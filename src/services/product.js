@@ -81,6 +81,17 @@ export const fetch = async (req) => {
           preserveNullAndEmptyArrays: true,
         },
       },
+      {
+        $addFields: {
+          imageUrl: {
+            $cond: {
+              if: { $ne: ["$image", null] },
+              then: { $concat: ["http://localhost:4200/", "$image"] }, 
+              else: ""  
+            }
+          }
+        }
+      },
       { $sort: { createdAt: -1 } },
     ];
 
