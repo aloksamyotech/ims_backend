@@ -19,9 +19,6 @@ export const connectDb = async () => {
     if (!adminExists) {
       const admin = new Admin(defaultAdmin);
       await admin.save();
-      console.log('Default admin created.');
-    } else {
-      console.log('Admin already exists.');
     }
   } catch (error) {
     console.log("Error connection mongodb");

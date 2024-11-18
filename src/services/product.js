@@ -1,5 +1,5 @@
 import ProductSchemaModel from "../models/products.js";
-import { messages, tableNames } from "../common/constant.js";
+import { image_url, messages, tableNames } from "../common/constant.js";
 import CategorySchemaModel from "../models/category.js";
 import UnitSchemaModel from "../models/unit.js";
 
@@ -86,7 +86,7 @@ export const fetch = async (req) => {
           imageUrl: {
             $cond: {
               if: { $ne: ["$image", null] },
-              then: { $concat: ["http://localhost:4200/", "$image"] }, 
+              then: { $concat: [image_url.url, "$image"] }, 
               else: ""  
             }
           }
