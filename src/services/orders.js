@@ -311,3 +311,30 @@ export const approveOrder = async (id) => {
     throw new Error(messages.data_add_success + error.message);
   }
 };
+
+export const handleOrderStatus = async (id, action) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new Error(messages.invalid_format);
+    }
+    const order = await OrderSchemaModel.findById(id);
+    if (!order) {
+      throw new Error(messages.data_not_found);
+    }
+    if (order.order_status === 'Pending') {
+      if (action === 'approve') {
+        order.order_status = 'Completed';
+      } else if (action === 'cancel') {
+        order.order_status = 'Cancelled';
+      } else {
+        throw new Error('Invalid action provided');
+      }
+    } else {
+      throw new Error(messages.invalid_format);
+    }
+    await order.save();
+    return order;
+  } catch (error) {
+    throw new Error(error.message || messages.data_add_success + error.message);
+  }
+};

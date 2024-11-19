@@ -1,4 +1,4 @@
-import { save , fetch , deleteById , fetchById, approveOrder} from "../services/orders.js";
+import { save , fetch , deleteById , fetchById, handleOrderStatus} from "../services/orders.js";
 import { fetchCustomerProductReport } from "../services/reports.js";
 import { statusCodes, messages } from "../common/constant.js";
 
@@ -72,10 +72,11 @@ export const getCustomerProductReport = async (req, res) => {
   }
 };
 
-export const approveOrderController = async (req, res) => {
+export const updateOrderStatus = async (req, res) => {
   try {
-    const { id } = req.params; 
-    const updatedOrder = await approveOrder(id); 
+    const { id } = req.params;
+    const { action } = req.body; 
+    const updatedOrder = await handleOrderStatus(id, action); 
     return res.status(statusCodes.ok).json({
       message: messages.data_update_success,
       order: updatedOrder,

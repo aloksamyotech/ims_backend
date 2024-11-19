@@ -54,7 +54,7 @@ const OrderSchema = new mongoose.Schema(
     products: [ProductOrderSchema],
     order_status: {
       type: String,
-      enum: ["Pending", "Completed"],
+      enum: ["Pending", "Completed" , "Cancelled"],
       default: "Pending",
     },
     invoice_no: {
