@@ -27,6 +27,7 @@ export const tableNames = {
   orders: "orders",
   users: "users",
   purchase: "purchase",
+  admin: "admin",
 };
 
 export const messages = {
@@ -51,3 +52,5 @@ export const messages = {
   not_available: "Data not available",
   invalid_format: "Invalid data format",
 };
+
+export const image_url = {  url :"http://localhost:4200/" , };

@@ -1,5 +1,5 @@
 import ProductSchemaModel from "../models/products.js";
-import { messages, tableNames } from "../common/constant.js";
+import { image_url, messages, tableNames } from "../common/constant.js";
 import CategorySchemaModel from "../models/category.js";
 import UnitSchemaModel from "../models/unit.js";
 
@@ -16,7 +16,7 @@ export const save = async (req, res) => {
       categoryId,
       unitId,
     } = req.body;
- 
+  
     const category = await CategorySchemaModel.findById(categoryId);
     if (!category) {
       throw new Error(messages.data_not_found);
@@ -39,6 +39,7 @@ export const save = async (req, res) => {
       categoryName: category.catnm,
       unitId: unit._id,
       unitName: unit.unitnm,
+      image: req.file ? req.file.path : null, 
     });
     return await productModel.save();
   } catch (error) {
@@ -79,6 +80,17 @@ export const fetch = async (req) => {
           path: "$unitData",
           preserveNullAndEmptyArrays: true,
         },
+      },
+      {
+        $addFields: {
+          imageUrl: {
+            $cond: {
+              if: { $ne: ["$image", null] },
+              then: { $concat: [image_url.url, "$image"] }, 
+              else: ""  
+            }
+          }
+        }
       },
       { $sort: { createdAt: -1 } },
     ];

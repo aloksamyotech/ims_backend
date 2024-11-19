@@ -18,7 +18,7 @@ const generateInvoicePDF = async (orderData) => {
 
   const filePath = path.join(
     __dirname,
-    "../invoices",
+    "../uploads/invoices",
     `invoice-${orderData._id}.pdf`
   );
 
@@ -294,4 +294,20 @@ export const deleteById = async (id) => {
     throw new Error(messages.data_not_found);
   }
   return await order.save();
+};
+
+export const approveOrder = async (id) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new Error(messages.invalid_format);
+    }
+    const order = await OrderSchemaModel.findById(id);
+    if (!order) {
+      throw new Error(messages.invalid_format);
+    }
+    order.order_status = 'Completed';
+    return await order.save();
+  } catch (error) {
+    throw new Error(messages.data_add_success + error.message);
+  }
 };

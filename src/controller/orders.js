@@ -1,4 +1,4 @@
-import { save , fetch , deleteById , fetchById} from "../services/orders.js";
+import { save , fetch , deleteById , fetchById, approveOrder} from "../services/orders.js";
 import { fetchCustomerProductReport } from "../services/reports.js";
 import { statusCodes, messages } from "../common/constant.js";
 
@@ -69,5 +69,18 @@ export const getCustomerProductReport = async (req, res) => {
     res.status(statusCodes.internalServerError).json({
       message : messages.fetching_failed
     });
+  }
+};
+
+export const approveOrderController = async (req, res) => {
+  try {
+    const { id } = req.params; 
+    const updatedOrder = await approveOrder(id); 
+    return res.status(statusCodes.ok).json({
+      message: messages.data_update_success,
+      order: updatedOrder,
+    });
+  } catch (error) {
+    return res.status(statusCodes.internalServerError).json({ message: error.message });
   }
 };
