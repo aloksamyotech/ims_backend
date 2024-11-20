@@ -27,7 +27,7 @@ export const fetch_purchase = async (req, res) => {
 };
 
 export const fetchById_purchase = async (req, res) => {
-  const id = req.params.id;
+  const id = req.params?.id;
   try {
     const purchaseResponse = await fetchById(id); 
     if (purchaseResponse) {
@@ -46,7 +46,7 @@ export const fetchById_purchase = async (req, res) => {
 
 
 export const deletePurchase = async (req, res) => {
-  const id = req.params.id;
+  const id = req.params?.id;
   if (!id) {
     return res.status(statusCodes.badRequest).json({ message: messages.required });
   }
@@ -75,8 +75,8 @@ export const getSupplierProductReport = async (req, res) => {
 
 export const updatePurchaseStatus = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { action } = req.body; 
+    const id = req.params?.id;
+    const action  = req.body?.action; 
     const updatedPurchase = await handlePurchaseStatus(id, action); 
     return res.status(statusCodes.ok).json({
       message: messages.data_update_success,

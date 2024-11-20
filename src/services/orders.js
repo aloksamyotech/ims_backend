@@ -305,21 +305,19 @@ export const handleOrderStatus = async (id, action) => {
     if (!order) {
       throw new Error(messages.data_not_found);
     }
-    if (order.order_status === 'Pending') {
+    const currentStatus = order.order_status;
+    if (currentStatus === 'Pending') {
+      let newStatus;
       if (action === 'approve') {
-        order.order_status = 'Completed';
-        for (const product of order.products) {
-          await updateProductQuantity(product.productId, product.quantity);
-        }
+        newStatus = 'Completed';
       } else if (action === 'cancel') {
-        order.order_status = 'Cancelled';
+        newStatus = 'Cancelled';
       } else {
         throw new Error('Invalid action provided');
       }
-    } else {
-      throw new Error(messages.invalid_format);
+      order.order_status = newStatus;
+      await order.save(); 
     }
-    await order.save();
     return order;
   } catch (error) {
     throw new Error(error.message || messages.data_add_success + error.message);

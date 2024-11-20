@@ -25,7 +25,7 @@ export const fetch_order = async (req, res) => {
 };
 
 export const fetchById_order = async (req, res) => {
-  const id = req.params.id;
+  const id = req.params?.id;
   try {
     const orderResponse = await fetchById(id); 
     if (orderResponse) {
@@ -44,7 +44,7 @@ export const fetchById_order = async (req, res) => {
 
 
 export const deleteOrder = async (req, res) => {
-  const id = req.params.id;
+  const id = req.params?.id;
   if (!id) {
     return res.status(statusCodes.badRequest).json({ message: messages.required });
   }
@@ -74,8 +74,8 @@ export const getCustomerProductReport = async (req, res) => {
 
 export const updateOrderStatus = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { action } = req.body; 
+    const id = req.params?.id;
+    const action  = req.body?.action; 
     const updatedOrder = await handleOrderStatus(id, action); 
     return res.status(statusCodes.ok).json({
       message: messages.data_update_success,
