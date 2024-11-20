@@ -57,7 +57,7 @@ const PurchaseSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Pending", "Completed"],
+      enum: ["Pending", "Completed" , "Cancelled"],
       default: "Pending",
     },
     total: {
@@ -72,6 +72,7 @@ const PurchaseSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    isDeleted: { type: Boolean, default: false },
     products: [ProductOrderSchema],
   },
   { timestamps: true }

@@ -99,18 +99,6 @@ const generateInvoicePDF = async (orderData) => {
 };
 
 export const save = async (req) => {
-  const updateProductQuantity = async (productId, quantity) => {
-    const product = await ProductSchemaModel.findById(productId);
-    if (!product) {
-      throw new Error(messages.data_not_found);
-    }
-    if (product.quantity < quantity) {
-      throw new Error(messages.not_available);
-    }
-    product.quantity -= Number(quantity);
-    await product.save();
-  };
-
   try {
     const { date, products, order_status, total, subtotal, tax, customerId } =
       req.body;
@@ -134,7 +122,6 @@ export const save = async (req) => {
         quantity: product.quantity,
         price: dbProduct.buyingPrice,
       });
-      await updateProductQuantity(product.productId, product.quantity);
     }
 
     const orderModel = new OrderSchemaModel({
@@ -165,7 +152,7 @@ export const save = async (req) => {
 
 export const fetch = async (req) => {
   try {
-    const condition_obj = { ...req.query };
+    const condition_obj = { ...req.query , isDeleted: false  };
     const pipeline = [
       { $match: condition_obj },
       {
@@ -293,26 +280,23 @@ export const deleteById = async (id) => {
   if (!order) {
     throw new Error(messages.data_not_found);
   }
+  order.isDeleted = true;
   return await order.save();
 };
 
-export const approveOrder = async (id) => {
-  try {
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new Error(messages.invalid_format);
-    }
-    const order = await OrderSchemaModel.findById(id);
-    if (!order) {
-      throw new Error(messages.invalid_format);
-    }
-    order.order_status = 'Completed';
-    return await order.save();
-  } catch (error) {
-    throw new Error(messages.data_add_success + error.message);
-  }
-};
-
 export const handleOrderStatus = async (id, action) => {
+  const updateProductQuantity = async (productId, quantity) => {
+    const product = await ProductSchemaModel.findById(productId);
+    if (!product) {
+      throw new Error(messages.data_not_found);
+    }
+    if (product.quantity < quantity) {
+      throw new Error(messages.not_available);
+    }
+    product.quantity -= Number(quantity);
+    await product.save();
+  };
+
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new Error(messages.invalid_format);
@@ -324,6 +308,9 @@ export const handleOrderStatus = async (id, action) => {
     if (order.order_status === 'Pending') {
       if (action === 'approve') {
         order.order_status = 'Completed';
+        for (const product of order.products) {
+          await updateProductQuantity(product.productId, product.quantity);
+        }
       } else if (action === 'cancel') {
         order.order_status = 'Cancelled';
       } else {

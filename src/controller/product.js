@@ -1,4 +1,4 @@
-import { save, update , fetch , deleteById } from "../services/product.js";
+import { save, update , fetch , deleteById ,fetchById} from "../services/product.js";
 import { statusCodes, messages } from "../common/constant.js";
 
 export const create = async (req, res) => {
@@ -19,6 +19,25 @@ export const fetch_product = async (req, res) => {
   } catch (error) {
     res.status(statusCodes.internalServerError).json({
       message : messages.fetching_failed
+    });
+  }
+};
+
+
+export const fetchById_product = async (req, res) => {
+  const id = req.params.id;
+  try {
+    const productResponse = await fetchById(id); 
+    if (productResponse) {
+      res.status(statusCodes.ok).json(productResponse);
+    } else {
+      res.status(statusCodes.notFound).json({
+        message: messages.data_not_found
+      });
+    }
+  } catch (error) {
+    res.status(statusCodes.internalServerError).json({
+      message :messages.fetching_failed
     });
   }
 };

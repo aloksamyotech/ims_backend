@@ -52,6 +52,14 @@ export const fetch = async (req) => {
   }
 };
 
+export const fetchById = async (id) => {
+  try {
+    return await CustomerSchemaModel.findById(id);
+  } catch (error) {
+    throw new Error(messages.fetching_failed);
+  }
+};
+
 export const update = async (id, updateData) => {
   try {
     const updatedCustomer = await CustomerSchemaModel.findByIdAndUpdate(

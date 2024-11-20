@@ -5,14 +5,6 @@ import ProductSchemaModel from "../models/products.js";
 import mongoose from "mongoose";
 
 export const save = async (req) => {
-  const updateProductQuantity = async (productId, quantity) => {
-    const product = await ProductSchemaModel.findById(productId);
-    if (!product) {
-      throw new Error(`${messages.data_not_found} ${productId}`);
-    }
-    product.quantity = (Number(product.quantity) || 0) + Number(quantity);
-    await product.save();
-  };
   try {
     const {
       date,
@@ -43,7 +35,6 @@ export const save = async (req) => {
         quantity: product.quantity,
         price: dbProduct.buyingPrice,
       });
-      await updateProductQuantity(product.productId, product.quantity);
     }
 
     const purchaseModel = new PurchaseSchemaModel({
@@ -66,7 +57,7 @@ export const save = async (req) => {
 
 export const fetch = async (req) => {
   try {
-    const condition_obj = { ...req.query };
+    const condition_obj = { ...req.query , isDeleted : false};
     const pipeline = [
       { $match: condition_obj },
       {
@@ -190,22 +181,44 @@ export const deleteById = async (id) => {
   if (!purchase) {
     throw new Error(messages.data_not_found);
   }
+  purchase.isDeleted = true;
   return await purchase.save(); 
 };
 
-export const approvePurchase = async (id) => {
+export const handlePurchaseStatus = async (id, action) => {
+  const updateProductQuantity = async (productId, quantity) => {
+    const product = await ProductSchemaModel.findById(productId);
+    if (!product) {
+      throw new Error(`${messages.data_not_found} ${productId}`);
+    }
+    product.quantity = (Number(product.quantity) || 0) + Number(quantity);
+    await product.save();
+  };
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new Error(messages.invalid_format);
     }
     const purchase = await PurchaseSchemaModel.findById(id);
     if (!purchase) {
+      throw new Error(messages.data_not_found);
+    }
+    if (purchase.status === 'Pending') {
+      if (action === 'approve') {
+        purchase.status = 'Completed';
+        for (const product of purchase.products) {
+          await updateProductQuantity(product.productId, product.quantity);
+        }
+      } else if (action === 'cancel') {
+        purchase.status = 'Cancelled';
+      } else {
+        throw new Error('Invalid action provided');
+      }
+    } else {
       throw new Error(messages.invalid_format);
     }
-    purchase.status = 'Completed';
     return await purchase.save();
   } catch (error) {
-    throw new Error(messages.data_add_success + error.message);
+    throw new Error(error.message || messages.data_add_success + error.message);
   }
 };
 

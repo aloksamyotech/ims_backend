@@ -6,6 +6,7 @@ import { upload } from '../common/upload_multer.js';
 productRouter.post("/save", upload,ProductController.create);
 productRouter.get("/fetch",ProductController.fetch_product);
 productRouter.patch("/update/:id", ProductController.updateProduct);
+productRouter.get("/fetchById/:id",ProductController.fetchById_product);
 productRouter.delete("/deleteById/:id",ProductController.deleteProduct);
 
 export default productRouter;

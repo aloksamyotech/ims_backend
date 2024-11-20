@@ -2,8 +2,9 @@ import ProductSchemaModel from "../models/products.js";
 import { image_url, messages, tableNames } from "../common/constant.js";
 import CategorySchemaModel from "../models/category.js";
 import UnitSchemaModel from "../models/unit.js";
+import mongoose from "mongoose";
 
-export const save = async (req, res) => {
+export const save = async (req) => {
   try {
     const {
       productnm,
@@ -84,18 +85,79 @@ export const fetch = async (req) => {
       {
         $addFields: {
           imageUrl: {
-            $cond: {
-              if: { $ne: ["$image", null] },
-              then: { $concat: [image_url.url, "$image"] }, 
-              else: ""  
-            }
+            $ifNull: [
+              { $concat: [image_url.url, "$image"] },  
+              ""  
+            ]
           }
         }
       },
-      { $sort: { createdAt: -1 } },
+      {
+        $sort: { createdAt: -1 }  
+      },
     ];
 
    return await ProductSchemaModel.aggregate(pipeline);
+  } catch (error) {
+    throw new Error(messages.fetching_failed + error.message);
+  }
+};
+
+export const fetchById = async (id) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new Error(messages.invalid_format);
+    }
+    const condition_obj = { _id: new mongoose.Types.ObjectId(id) };
+    const pipeline = [
+      { $match: condition_obj },
+      {
+        $lookup: {
+          from: tableNames.pcategory,
+          localField: "categoryId",
+          foreignField: "_id",
+          as: "categoryData",
+        },
+      },
+      {
+        $lookup: {
+          from: tableNames.punit,
+          localField: "unitId",
+          foreignField: "_id",
+          as: "unitData",
+        },
+      },
+      {
+        $unwind: {
+          path: "$categoryData",
+          preserveNullAndEmptyArrays: true, 
+        },
+      },
+      {
+        $unwind: {
+          path: "$unitData",
+          preserveNullAndEmptyArrays: true, 
+        },
+      },
+      {
+        $addFields: {
+          imageUrl: {
+            $ifNull: [
+              { $concat: [image_url.url, "$image"] },  
+              ""  
+            ]
+          }
+        }
+      },
+      {
+        $sort: { createdAt: -1 }  
+      },
+    ];
+    const product = await ProductSchemaModel.aggregate(pipeline);
+    if (!product.length) {
+      throw new Error(messages.data_not_found);
+    }
+    return product[0];
   } catch (error) {
     throw new Error(messages.fetching_failed + error.message);
   }

@@ -1,4 +1,4 @@
-import { save , fetch , deleteById , fetchById,   approvePurchase,} from "../services/purchase.js";
+import { save , fetch , deleteById , fetchById,   handlePurchaseStatus,} from "../services/purchase.js";
 import { fetchSupplierProductReport } from "../services/reports.js"; 
 import { statusCodes, messages } from "../common/constant.js";
 
@@ -73,13 +73,14 @@ export const getSupplierProductReport = async (req, res) => {
   }
 };
 
-export const approvePurchaseController = async (req, res) => {
+export const updatePurchaseStatus = async (req, res) => {
   try {
-    const { id } = req.params; 
-    const updatedPurchase = await approvePurchase(id); 
+    const { id } = req.params;
+    const { action } = req.body; 
+    const updatedPurchase = await handlePurchaseStatus(id, action); 
     return res.status(statusCodes.ok).json({
       message: messages.data_update_success,
-      purchase: updatedPurchase,
+      order: updatedPurchase,
     });
   } catch (error) {
     return res.status(statusCodes.internalServerError).json({ message: error.message });

@@ -5,6 +5,7 @@ const customerRouter = express.Router();
 customerRouter.post("/save", CustomerController.create)
 customerRouter.get("/fetch",CustomerController.fetch_customer);
 customerRouter.patch("/update/:id", CustomerController.updateCustomer);
+customerRouter.get("/fetchById/:id", CustomerController.fetchById_customer);
 customerRouter.delete("/deleteById/:id",CustomerController.deleteCustomer);
 
 export default customerRouter;
