@@ -11,10 +11,10 @@ const adminSchema = new mongoose.Schema(
       trim: true,
     },
     phone: {
-        type: Number,
-        required: true,
-        trim: true,
-      },
+      type: Number,
+      required: true,
+      trim: true,
+    },
     email: {
       type: String,
       required: true,
@@ -29,7 +29,6 @@ const adminSchema = new mongoose.Schema(
     role: {
       type: String,
       default: "admin",
-      enum: ["admin", "superadmin"],
     },
     isDeleted: {
       type: Boolean,
@@ -39,6 +38,14 @@ const adminSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    currencyCode: {
+      type: String,
+      default: "INR",
+    },
+    currencySymbol: {
+      type: String,
+      default: "₹", 
+    }
   },
   { timestamps: true }
 );
