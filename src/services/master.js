@@ -11,4 +11,20 @@ export const fetch = async (req) => {
       return error;
     }
   };
+
+  export const update = async (id, updateData) => {
+    try {
+        const response = await AdminSchemaModel.findByIdAndUpdate(
+            id,
+            updateData,
+            { new: true }
+        );
+        if (!response || response.isDeleted) {
+            throw new Error(messages.data_not_found);
+        }
+        return response;
+    } catch (error) {
+        throw new Error(messages.data_add_error);
+    }
+  };
   
