@@ -306,18 +306,25 @@ export const handleOrderStatus = async (id, action) => {
       throw new Error(messages.data_not_found);
     }
     const currentStatus = order?.order_status;
+    
     if (currentStatus === 'pending') {
       let newStatus;
+      
       if (action === 'approve') {
         newStatus = 'completed';
+        for (const product of order?.products || []) {
+          await updateProductQuantity(product?.productId, product?.quantity);  
+        }
       } else if (action === 'cancel') {
         newStatus = 'cancelled';
       } else {
         throw new Error('Invalid action provided');
       }
+
       order.order_status = newStatus;
       await order.save(); 
     }
+
     return order;
   } catch (error) {
     throw new Error(error.message || messages.data_add_success + error.message);
