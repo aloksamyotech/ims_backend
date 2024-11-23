@@ -25,16 +25,13 @@ export const fetch_order = async (req, res) => {
 };
 
 export const fetchById_order = async (req, res) => {
-  const id = req.params?.id;
+  const id = req?.params?.id;
   try {
     const orderResponse = await fetchById(id); 
-    if (orderResponse) {
-      res.status(statusCodes.ok).json(orderResponse);
-    } else {
-      res.status(statusCodes.notFound).json({
-        message: messages.data_not_found
-      });
+    if (!orderResponse) {
+      return res.status(statusCodes.notFound).json({ message: messages.data_not_found });
     }
+    res.status(statusCodes.ok).json(orderResponse);
   } catch (error) {
     res.status(statusCodes.internalServerError).json({
       message :messages.fetching_failed
@@ -44,7 +41,7 @@ export const fetchById_order = async (req, res) => {
 
 
 export const deleteOrder = async (req, res) => {
-  const id = req.params?.id;
+  const id = req?.params?.id;
   if (!id) {
     return res.status(statusCodes.badRequest).json({ message: messages.required });
   }
@@ -74,8 +71,8 @@ export const getCustomerProductReport = async (req, res) => {
 
 export const updateOrderStatus = async (req, res) => {
   try {
-    const id = req.params?.id;
-    const action  = req.body?.action; 
+    const id = req?.params?.id;
+    const action  = req?.body?.action; 
     const updatedOrder = await handleOrderStatus(id, action); 
     return res.status(statusCodes.ok).json({
       message: messages.data_update_success,

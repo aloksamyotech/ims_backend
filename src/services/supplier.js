@@ -13,7 +13,7 @@ export const save = async (req) => {
       bankName,
       accountHolder,
       accountNumber,
-    } = req.body;
+    } = req?.body;
     const supplierModel = new SupplierSchemaModel({
       suppliernm,
       email,
@@ -33,7 +33,7 @@ export const save = async (req) => {
 
 export const fetch = async (req) => {
   try {
-    const condition_obj = req.query;
+    const condition_obj = req?.query;
     const suppliersList = await SupplierSchemaModel.find({
       ...condition_obj,
       isDeleted: false,

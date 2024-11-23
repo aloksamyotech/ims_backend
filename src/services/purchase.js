@@ -14,7 +14,7 @@ export const save = async (req) => {
       subtotal,
       tax,
       supplierId,
-    } = req.body;
+    } = req?.body;
 
     const supplier = await SupplierSchemaModel.findById(supplierId);
     if (!supplier) {
@@ -40,7 +40,7 @@ export const save = async (req) => {
     const purchaseModel = new PurchaseSchemaModel({
       date: new Date(date), 
       products: productOrders,
-      status: status || 'Pending',
+      status: status || 'pending',
       total,
       subtotal,
       tax,
@@ -191,31 +191,34 @@ export const handlePurchaseStatus = async (id, action) => {
     if (!product) {
       throw new Error(`${messages.data_not_found} ${productId}`);
     }
-    product.quantity = (Number(product.quantity) || 0) + Number(quantity);
+    product.quantity = (Number(product?.quantity) || 0) + Number(quantity);
     await product.save();
   };
+
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new Error(messages.invalid_format);
     }
+
     const purchase = await PurchaseSchemaModel.findById(id);
     if (!purchase) {
       throw new Error(messages.data_not_found);
     }
-    if (purchase.status === 'Pending') {
+    if (purchase?.status === 'pending') {
       if (action === 'approve') {
-        purchase.status = 'Completed';
-        for (const product of purchase.products) {
-          await updateProductQuantity(product.productId, product.quantity);
+        purchase.status = 'completed';
+        for (const product of purchase?.products || []) {
+          await updateProductQuantity(product?.productId, product?.quantity);  
         }
       } else if (action === 'cancel') {
-        purchase.status = 'Cancelled';
+        purchase.status = 'cancelled';
       } else {
         throw new Error('Invalid action provided');
       }
     } else {
       throw new Error(messages.invalid_format);
     }
+
     return await purchase.save();
   } catch (error) {
     throw new Error(error.message || messages.data_add_success + error.message);

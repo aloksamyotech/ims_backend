@@ -34,10 +34,6 @@ const adminSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
     currencyCode: {
       type: String,
       default: "INR",

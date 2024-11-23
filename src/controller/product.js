@@ -25,16 +25,13 @@ export const fetch_product = async (req, res) => {
 
 
 export const fetchById_product = async (req, res) => {
-  const id = req.params.id;
+  const id = req?.params?.id;
   try {
-    const productResponse = await fetchById(id); 
-    if (productResponse) {
-      res.status(statusCodes.ok).json(productResponse);
-    } else {
-      res.status(statusCodes.notFound).json({
-        message: messages.data_not_found
-      });
+    const productResponse = await fetchById(id);
+    if (!productResponse) {
+      return res.status(statusCodes.notFound).json({ message: messages.data_not_found });
     }
+    res.status(statusCodes.ok).json(productResponse);
   } catch (error) {
     res.status(statusCodes.internalServerError).json({
       message :messages.fetching_failed
@@ -43,11 +40,11 @@ export const fetchById_product = async (req, res) => {
 };
 
 export const updateProduct = async (req, res) => {
-  const id = req.params.id;
+  const id = req?.params?.id;
   if (!id) {
     return res.status(statusCodes.badRequest).json({ message: messages.required });
   }
-  const updateData = req.body;
+  const updateData = req?.body;
   try {
     const updatedProduct = await update(id, updateData);
     if (!updatedProduct) {
@@ -62,7 +59,7 @@ export const updateProduct = async (req, res) => {
 };
 
 export const deleteProduct = async (req, res) => {
-  const id = req.params.id;
+  const id = req?.params?.id;
   if (!id) {
     return res.status(statusCodes.badRequest).json({ message: messages.required });
   }

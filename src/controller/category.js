@@ -24,8 +24,8 @@ export const fetch_category = async (req, res) => {
 };
 
 export const updateCategory = async (req, res) => {
-  const { id } = req.params; 
-  const updateData = req.body; 
+  const id = req?.params?.id;
+  const updateData = req?.body; 
   try {
     const updatedCategory = await update(id, updateData);
     if (!updatedCategory) {
@@ -39,7 +39,7 @@ export const updateCategory = async (req, res) => {
 
 export const deleteCategory = async (req, res) => {
   try {
-      const id = req.params.id;
+      const id = req?.params?.id;
       await deleteById(id);
       res.status(statusCodes.ok).json({ msg: messages.data_deletion_success });
   } catch (error) {

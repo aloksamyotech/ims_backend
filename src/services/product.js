@@ -16,7 +16,7 @@ export const save = async (req) => {
       notes,
       categoryId,
       unitId,
-    } = req.body;
+    } = req?.body;
   
     const category = await CategorySchemaModel.findById(categoryId);
     if (!category) {

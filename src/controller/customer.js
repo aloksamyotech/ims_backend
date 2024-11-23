@@ -26,11 +26,11 @@ export const fetch_customer = async (req, res) => {
 
 
 export const updateCustomer = async (req, res) => {
-  const id  = req.params.id; 
+  const id  = req?.params?.id; 
   if (!id) {
     return res.status(statusCodes.badRequest).json(messages.required );
   }
-  const updateData = req.body; 
+  const updateData = req?.body; 
   try {
     const updatedCustomer = await update(id, updateData);
     if (!updatedCustomer) {
@@ -46,12 +46,11 @@ export const updateCustomer = async (req, res) => {
 
 export const fetchById_customer = async (req, res) => {
   try {
-    const id = req.params.id;
+    const id = req?.params?.id;
     const customer = await fetchById(id); 
     if (!customer) {
       return res.status(statusCodes.notFound).json({ message:messages.data_not_found });
     }
-
     return res.status(statusCodes.ok).json(customer); 
   } catch (error) {
     return res.status(statusCodes.internalServerError).json({ message: messages.fetching_failed, error: error.message }); 
@@ -59,7 +58,7 @@ export const fetchById_customer = async (req, res) => {
 };
 
 export const deleteCustomer = async (req, res) => {
-  const id = req.params.id;
+  const id = req?.params?.id;
   if (!id) {
     return res.status(statusCodes.badRequest).json({ message: messages.required });
   }

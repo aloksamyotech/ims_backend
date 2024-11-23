@@ -23,13 +23,11 @@ export const fetchUser = async (req, res) => {
 
 export const fetchById_User = async (req, res) => {
     try {
-      const id = req.params.id;
+      const id = req?.params?.id;
       const user = await fetchById(id); 
-  
       if (!user) {
         return res.status(statusCodes.notFound).json({ message: messages.data_not_found});
       }
-  
       return res.status(statusCodes.ok).json(user); 
     } catch (error) {
       return res.status(statusCodes.internalServerError).json({ message: error.message });
@@ -37,7 +35,7 @@ export const fetchById_User = async (req, res) => {
   };
 
 export const loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password } = req?.body;
   const result = await login(email, password);
   if (result.success) {
     return res
@@ -51,11 +49,11 @@ export const loginUser = async (req, res) => {
 };
 
 export const updateUser = async (req, res) => {
-  const id  = req.params.id; 
+  const id  = req?.params?.id; 
   if (!id) {
     return res.status(statusCodes.badRequest).json({ message:messages.required });
   }
-  const updateData = req.body; 
+  const updateData = req?.body; 
   try {
     const updatedUser = await update(id, updateData);
     if (!updatedUser) {
@@ -70,7 +68,7 @@ export const updateUser = async (req, res) => {
 };
 
 export const deleteUser = async (req, res) => {
-  const id = req.params.id;
+  const id = req?.params?.id;
   if (!id) {
     return res.status(statusCodes.badRequest).json({ message: messages.required });
   }
@@ -89,8 +87,8 @@ export const deleteUser = async (req, res) => {
 
 export const changePassword = async (req, res) => {
   try {
-    const { currentPassword, newPassword } = req.body;
-    const userId = req.user._id;
+    const { currentPassword, newPassword } = req?.body;
+    const userId = req?.user?._id;
     const result = await changePasswordService(userId, currentPassword, newPassword);
 
     if (result.success) {

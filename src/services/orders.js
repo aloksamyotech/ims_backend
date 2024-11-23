@@ -101,7 +101,7 @@ const generateInvoicePDF = async (orderData) => {
 export const save = async (req) => {
   try {
     const { date, products, order_status, total, subtotal, tax, customerId } =
-      req.body;
+      req?.body;
 
     const customer = await CustomerSchemaModel.findById(customerId);
     if (!customer) {
@@ -127,7 +127,7 @@ export const save = async (req) => {
     const orderModel = new OrderSchemaModel({
       date: new Date(date),
       products: productOrders,
-      order_status: order_status || "Pending",
+      order_status: order_status || "pending",
       total,
       subtotal,
       tax,
@@ -152,7 +152,7 @@ export const save = async (req) => {
 
 export const fetch = async (req) => {
   try {
-    const condition_obj = { ...req.query , isDeleted: false  };
+    const condition_obj = { ...req?.query , isDeleted: false  };
     const pipeline = [
       { $match: condition_obj },
       {
@@ -290,7 +290,7 @@ export const handleOrderStatus = async (id, action) => {
     if (!product) {
       throw new Error(messages.data_not_found);
     }
-    if (product.quantity < quantity) {
+    if (product?.quantity < quantity) {
       throw new Error(messages.not_available);
     }
     product.quantity -= Number(quantity);
@@ -305,13 +305,13 @@ export const handleOrderStatus = async (id, action) => {
     if (!order) {
       throw new Error(messages.data_not_found);
     }
-    const currentStatus = order.order_status;
-    if (currentStatus === 'Pending') {
+    const currentStatus = order?.order_status;
+    if (currentStatus === 'pending') {
       let newStatus;
       if (action === 'approve') {
-        newStatus = 'Completed';
+        newStatus = 'completed';
       } else if (action === 'cancel') {
-        newStatus = 'Cancelled';
+        newStatus = 'cancelled';
       } else {
         throw new Error('Invalid action provided');
       }
