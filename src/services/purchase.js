@@ -85,6 +85,8 @@ export const fetch = async (req) => {
           total: 1,
           supplierId: 1,
           supplierName: 1,
+          supplierEmail: 1,
+          supplierPhone: 1,
           products: {
             $map: {
               input: "$products",
@@ -222,6 +224,18 @@ export const handlePurchaseStatus = async (id, action) => {
     return await purchase.save();
   } catch (error) {
     throw new Error(error.message || messages.data_add_success + error.message);
+  }
+};
+
+export const countPurchases = async (req) => {
+  try {
+    const purchaseCount = await PurchaseSchemaModel.countDocuments({ isDeleted: false });
+    if (purchaseCount === 0) {
+      return 0;
+    }
+    return purchaseCount;
+  } catch (error) {
+    throw new Error(messages.data_not_found);
   }
 };
 

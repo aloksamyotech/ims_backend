@@ -1,4 +1,4 @@
-import { save, update , fetch , deleteById ,fetchById} from "../services/product.js";
+import { save, update , fetch , deleteById ,fetchById, lowStockProducts} from "../services/product.js";
 import { statusCodes, messages } from "../common/constant.js";
 
 export const create = async (req, res) => {
@@ -74,4 +74,22 @@ export const deleteProduct = async (req, res) => {
     });
   }
 };
+
+export const getLowStockCount = async (req, res) => {
+  try {
+    const stockCount = await lowStockProducts();
+    res.status(statusCodes.ok).json({
+      success: true,
+      message: messages.fetching_success,
+      count: stockCount.length, 
+      data: stockCount, 
+    });
+  } catch (error) {
+    res.status(statusCodes.internalServerError).json({
+      success: false,
+      message: messages.fetching_failed,
+    });
+  }
+};
+
 

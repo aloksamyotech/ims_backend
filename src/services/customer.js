@@ -84,3 +84,18 @@ export const deleteById = async (id) => {
   customer.isDeleted = true;
   return await customer.save();
 };
+
+export const countCustomer = async (req) => {
+  try {
+    const customerCount = await CustomerSchemaModel.countDocuments({ isDeleted: false });
+    if (customerCount === 0) {
+      return 0;
+    }
+    return customerCount;
+  } catch (error) {
+    throw new Error(messages.data_not_found);
+  }
+};
+
+
+

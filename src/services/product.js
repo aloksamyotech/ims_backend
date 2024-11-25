@@ -17,7 +17,7 @@ export const save = async (req) => {
       categoryId,
       unitId,
     } = req?.body;
-  
+
     const category = await CategorySchemaModel.findById(categoryId);
     if (!category) {
       throw new Error(messages.data_not_found);
@@ -40,7 +40,7 @@ export const save = async (req) => {
       categoryName: category.catnm,
       unitId: unit._id,
       unitName: unit.unitnm,
-      image: req.file ? req.file.path : null, 
+      image: req.file ? req.file.path : null,
     });
     return await productModel.save();
   } catch (error) {
@@ -85,19 +85,16 @@ export const fetch = async (req) => {
       {
         $addFields: {
           imageUrl: {
-            $ifNull: [
-              { $concat: [image_url.url, "$image"] },  
-              ""  
-            ]
-          }
-        }
+            $ifNull: [{ $concat: [image_url.url, "$image"] }, ""],
+          },
+        },
       },
       {
-        $sort: { createdAt: -1 }  
+        $sort: { createdAt: -1 },
       },
     ];
 
-   return await ProductSchemaModel.aggregate(pipeline);
+    return await ProductSchemaModel.aggregate(pipeline);
   } catch (error) {
     throw new Error(messages.fetching_failed + error.message);
   }
@@ -130,27 +127,24 @@ export const fetchById = async (id) => {
       {
         $unwind: {
           path: "$categoryData",
-          preserveNullAndEmptyArrays: true, 
+          preserveNullAndEmptyArrays: true,
         },
       },
       {
         $unwind: {
           path: "$unitData",
-          preserveNullAndEmptyArrays: true, 
+          preserveNullAndEmptyArrays: true,
         },
       },
       {
         $addFields: {
           imageUrl: {
-            $ifNull: [
-              { $concat: [image_url.url, "$image"] },  
-              ""  
-            ]
-          }
-        }
+            $ifNull: [{ $concat: [image_url.url, "$image"] }, ""],
+          },
+        },
       },
       {
-        $sort: { createdAt: -1 }  
+        $sort: { createdAt: -1 },
       },
     ];
     const product = await ProductSchemaModel.aggregate(pipeline);
@@ -189,6 +183,12 @@ export const deleteById = async (id) => {
   return product;
 };
 
-
-
+export const lowStockProducts = async () => {
+  try {
+    const lowStock = await ProductSchemaModel.find({ quantity: { $lt: 5 } });
+    return lowStock; 
+  } catch (error) {
+    throw new Error(messages.data_not_found); 
+  }
+};
 

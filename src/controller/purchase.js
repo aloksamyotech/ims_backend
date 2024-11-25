@@ -1,4 +1,4 @@
-import { save , fetch , deleteById , fetchById,   handlePurchaseStatus,} from "../services/purchase.js";
+import { save , fetch , deleteById , fetchById,   handlePurchaseStatus, countPurchases} from "../services/purchase.js";
 import { fetchSupplierProductReport } from "../services/reports.js"; 
 import { statusCodes, messages } from "../common/constant.js";
 
@@ -81,5 +81,21 @@ export const updatePurchaseStatus = async (req, res) => {
     });
   } catch (error) {
     return res.status(statusCodes.internalServerError).json({ message: error.message });
+  }
+};
+
+export const getPurchaseCount = async (req, res) => {
+  try {
+    const purchaseCount = await countPurchases();
+    res.status(statusCodes.ok).json({
+      success: true,
+      message: messages.fetching_success,
+      count: purchaseCount,
+    });
+  } catch (error) {
+    res.status(statusCodes.internalServerError).json({
+      success: false,
+      message: messages.fetching_failed,
+    });
   }
 };

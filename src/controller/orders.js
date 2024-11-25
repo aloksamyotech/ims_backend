@@ -1,4 +1,4 @@
-import { save , fetch , deleteById , fetchById, handleOrderStatus} from "../services/orders.js";
+import { save , fetch , deleteById , fetchById, handleOrderStatus , countOrders} from "../services/orders.js";
 import { fetchCustomerProductReport } from "../services/reports.js";
 import { statusCodes, messages } from "../common/constant.js";
 
@@ -80,5 +80,21 @@ export const updateOrderStatus = async (req, res) => {
     });
   } catch (error) {
     return res.status(statusCodes.internalServerError).json({ message: error.message });
+  }
+};
+
+export const getOrderCount = async (req, res) => {
+  try {
+    const orderCount = await countOrders();
+    res.status(statusCodes.ok).json({
+      success: true,
+      message: messages.fetching_success,
+      count: orderCount,
+    });
+  } catch (error) {
+    res.status(statusCodes.internalServerError).json({
+      success: false,
+      message: messages.fetching_failed,
+    });
   }
 };

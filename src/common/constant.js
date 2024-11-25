@@ -48,6 +48,7 @@ export const messages = {
   bad_request: "The request could not be understood by the server.",
   unauthorized_access: "You do not have permission to access this resource.",
   fetching_failed : "Failed to fetch data",
+  fetching_success : "Successfully fetch data",
   required : "This is required.",
   not_available: "Data not available",
   invalid_format: "Invalid data format",

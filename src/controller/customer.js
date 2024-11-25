@@ -1,4 +1,4 @@
-import { save , update , fetch , deleteById , fetchById} from '../services/customer.js';
+import { save , update , fetch , deleteById , fetchById , countCustomer} from '../services/customer.js';
 import { statusCodes, messages } from '../common/constant.js';
 
 export const create = async (req, res) => {
@@ -72,5 +72,23 @@ export const deleteCustomer = async (req, res) => {
     res.status(statusCodes.internalServerError).json({message : messages.bad_request});
   }
 };
+
+export const getCustomerCount = async (req, res) => {
+  try {
+    const customerCount = await countCustomer();
+    res.status(statusCodes.ok).json({
+      success: true,
+      message: messages.fetching_success,
+      count: customerCount,
+    });
+  } catch (error) {
+    res.status(statusCodes.internalServerError).json({
+      success: false,
+      message: messages.fetching_failed,
+    });
+  }
+};
+
+
 
 

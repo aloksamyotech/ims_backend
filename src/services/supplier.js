@@ -76,3 +76,15 @@ export const deleteById = async (id) => {
   supplier.isDeleted = true;
   return await supplier.save();
 };
+
+export const countSupplier = async (req) => {
+  try {
+    const supplierCount = await SupplierSchemaModel.countDocuments({ isDeleted: false });
+    if (supplierCount === 0) {
+      return 0;
+    }
+    return supplierCount;
+  } catch (error) {
+    throw new Error(messages.data_not_found);
+  }
+};

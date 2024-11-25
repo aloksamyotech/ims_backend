@@ -1,4 +1,4 @@
-import { save, fetch, update, deleteById , fetchById} from '../services/supplier.js';
+import { save, fetch, update, deleteById , fetchById, countSupplier} from '../services/supplier.js';
 import { statusCodes, messages } from '../common/constant.js';
 
 export const create = async (req, res) => {
@@ -78,6 +78,22 @@ export const deleteSupplier = async (req, res) => {
     res.status(statusCodes.internalServerError).json({ 
       message: messages.data_deletion_error, 
       error: error.message 
+    });
+  }
+};
+
+export const getSupplierCount = async (req, res) => {
+  try {
+    const supplierCount = await countSupplier();
+    res.status(statusCodes.ok).json({
+      success: true,
+      message: messages.fetching_success,
+      count: supplierCount,
+    });
+  } catch (error) {
+    res.status(statusCodes.internalServerError).json({
+      success: false,
+      message: messages.fetching_failed,
     });
   }
 };

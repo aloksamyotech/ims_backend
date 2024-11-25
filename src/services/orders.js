@@ -330,3 +330,15 @@ export const handleOrderStatus = async (id, action) => {
     throw new Error(error.message || messages.data_add_success + error.message);
   }
 };
+
+export const countOrders = async (req) => {
+  try {
+    const orderCount = await OrderSchemaModel.countDocuments({ isDeleted: false });
+    if (orderCount === 0) {
+      return 0;
+    }
+    return orderCount;
+  } catch (error) {
+    throw new Error(messages.data_not_found);
+  }
+};
