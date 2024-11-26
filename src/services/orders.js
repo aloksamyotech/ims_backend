@@ -342,3 +342,82 @@ export const countOrders = async (req) => {
     throw new Error(messages.data_not_found);
   }
 };
+
+export const getTotalSalesForMonth = async (req) => {
+  try {
+    const totalAmount = await OrderSchemaModel.aggregate([
+      {
+        $group: {
+          _id: { $month: '$createdAt' },
+          total_sales_amount: { $sum: "$total" }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ]);
+
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+
+    const formattedData = months.map((month, index) => {
+      const monthData = totalAmount.find((data) => data._id === index + 1);
+      return monthData ? monthData.total_sales_amount : 0;
+    });
+
+    return formattedData;
+  } catch (error) {
+    throw new Error(messages.data_not_found);
+  }
+};
+
+export const getTotalQuantityForMonth = async (req) => {
+  try {
+    const totalQuantity = await OrderSchemaModel.aggregate([
+      {
+        $match: {
+          order_status: 'completed', 
+        },
+      },
+      {
+        $unwind: '$products', 
+      },
+      {
+        $group: {
+          _id: { $month: '$createdAt' }, 
+          totalQuantitySold: { $sum: '$products.quantity' },  
+        },
+      },
+      {
+        $sort: { _id: 1 }, 
+      },
+      {
+        $project: {
+          _id: 0,
+          month: '$_id',
+          totalQuantitySold: 1,
+        },
+      },
+    ]);
+
+    const monthlyQuantities = new Array(12).fill(0);
+    totalQuantity.forEach((data) => {
+      const monthIndex = data.month - 1;  
+      monthlyQuantities[monthIndex] = data.totalQuantitySold; 
+    });
+    return monthlyQuantities; 
+  } catch (error) {
+    throw new Error(messages.data_not_found);
+  }
+};
+
+
+
+
+
+
+
+
+

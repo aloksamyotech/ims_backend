@@ -1,4 +1,5 @@
-import { save , fetch , deleteById , fetchById, handleOrderStatus , countOrders} from "../services/orders.js";
+import { save , fetch , deleteById , fetchById, handleOrderStatus , countOrders,
+   getTotalSalesForMonth , getTotalQuantityForMonth} from "../services/orders.js";
 import { fetchCustomerProductReport } from "../services/reports.js";
 import { statusCodes, messages } from "../common/constant.js";
 
@@ -98,3 +99,36 @@ export const getOrderCount = async (req, res) => {
     });
   }
 };
+
+
+export const getTotalSales = async (req, res) => {
+  try {
+    const salesData = await getTotalSalesForMonth();
+    res.status(statusCodes.ok).json({
+      success: true,
+      data: salesData
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: messages.internalServerError
+    });
+  }
+};
+
+export const getTotalQuantity = async (req, res) => {
+  try {
+    const salesData = await getTotalQuantityForMonth();
+    res.status(statusCodes.ok).json({
+      success: true,
+      data: salesData
+    });
+  } catch (error) {
+    res.status(statusCodes.internalServerError).json({
+      success: false,
+      message: messages.internalServerError
+    });
+  }
+};
+
+
