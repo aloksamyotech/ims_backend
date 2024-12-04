@@ -1,7 +1,6 @@
 import ProductSchemaModel from "../models/products.js";
 import { image_url, messages, tableNames } from "../common/constant.js";
 import CategorySchemaModel from "../models/category.js";
-import UnitSchemaModel from "../models/unit.js";
 import mongoose from "mongoose";
 
 export const save = async (req) => {
@@ -15,16 +14,10 @@ export const save = async (req) => {
       margin,
       notes,
       categoryId,
-      unitId,
     } = req?.body;
 
     const category = await CategorySchemaModel.findById(categoryId);
     if (!category) {
-      throw new Error(messages.data_not_found);
-    }
-
-    const unit = await UnitSchemaModel.findById(unitId);
-    if (!unit) {
       throw new Error(messages.data_not_found);
     }
 
@@ -38,8 +31,6 @@ export const save = async (req) => {
       notes,
       categoryId: category._id,
       categoryName: category.catnm,
-      unitId: unit._id,
-      unitName: unit.unitnm,
       image: req.file ? req.file.path : null,
     });
     return await productModel.save();
@@ -63,22 +54,8 @@ export const fetch = async (req) => {
         },
       },
       {
-        $lookup: {
-          from: tableNames.punit,
-          localField: "unitId",
-          foreignField: "_id",
-          as: "unitData",
-        },
-      },
-      {
         $unwind: {
           path: "$categoryData",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $unwind: {
-          path: "$unitData",
           preserveNullAndEmptyArrays: true,
         },
       },
@@ -117,22 +94,8 @@ export const fetchById = async (id) => {
         },
       },
       {
-        $lookup: {
-          from: tableNames.punit,
-          localField: "unitId",
-          foreignField: "_id",
-          as: "unitData",
-        },
-      },
-      {
         $unwind: {
           path: "$categoryData",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $unwind: {
-          path: "$unitData",
           preserveNullAndEmptyArrays: true,
         },
       },

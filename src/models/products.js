@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 import uniqueValidator from "mongoose-unique-validator";
 import { tableNames } from "../common/constant.js";
 import CategorySchemaModel from "./category.js";
-import UnitSchemaModel from "./unit.js";
 
 const ProductSchema = new mongoose.Schema(
   {
@@ -56,15 +55,6 @@ const ProductSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    unitId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: tableNames.punit,
-      required: true, 
-    },
-    unitName: {
-      type: String,
-      trim: true,
-    },
     image: {
       type: String,
     },
@@ -97,11 +87,6 @@ ProductSchema.pre("save", async function (next) {
   if (this.categoryId) {
     const category = await CategorySchemaModel.findById(this.categoryId);
     this.categoryName = category ? category.catnm : null; 
-  }
-
-  if (this.unitId) {
-    const unit = await UnitSchemaModel.findById(this.unitId);
-    this.unitName = unit ? unit.unitnm : null; 
   }
 
   if (this.productnm) {
