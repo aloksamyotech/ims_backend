@@ -13,21 +13,33 @@ export const fetchAdmin = async (req, res) => {
   }
 };
 
-  export const updateAdmin = async (req, res) => {
-    const id  = req?.params?.id; 
-    if (!id) {
-      return res.status(statusCodes.badRequest).json({ message:messages.required });
-    }
-    const updateData = req?.body; 
-    try {
-      const response = await update(id, updateData);
-      if (!response) {
-        return res.status(statusCodes.notFound).json({ message: messages.not_found });
-      }
-      return res.status(statusCodes.ok).json(response);
-    } catch (error) {
-      return res.status(statusCodes.internalServerError).json({ 
-        message : messages.fetching_failed
-      });
-    }
-  };
+
+export const updateAdmin = async (req, res) => {
+  try {
+    const { currencyCode, currencySymbol } = req.body;
+
+    // If a file is uploaded, get the logo path from the file (assumed 'image' is the field name in the form)
+    const logo = req.file ? req.file.path : null;
+
+    // Prepare the data to be updated
+    const updateData = {
+      currencyCode,
+      currencySymbol,
+      logo,
+    };
+
+    // Call the service to update the admin profile
+    const updatedAdmin = await update(updateData);
+
+    // If the admin profile is updated successfully
+    return res.status(statusCodes.ok).json(updatedAdmin);
+  } catch (error) {
+    console.error(error); // Log the error for debugging
+
+    // Send a response with an error message
+    return res.status(statusCodes.internalServerError).json({
+      message: error.message || messages.fetching_failed, // Provide a custom error message
+    });
+  }
+};
+

@@ -18,8 +18,9 @@ export const connectDb = async () => {
     if (!adminExists) {
       const admin = new Admin(defaultAdmin);
       await admin.save();
+      console.log("Default master data created");
     }
   } catch (error) {
-    console.log("Error connection mongodb");
+    console.log("Error connection mongodb" + error);
   }
 };

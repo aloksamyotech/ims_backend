@@ -41,7 +41,11 @@ const adminSchema = new mongoose.Schema(
     currencySymbol: {
       type: String,
       default: "₹", 
-    }
+    },
+    logo: {
+      type: String,
+      default: "/uploads/inventory-logo.png",
+    },
   },
   { timestamps: true }
 );
