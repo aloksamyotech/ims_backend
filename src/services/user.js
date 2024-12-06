@@ -5,7 +5,7 @@ import { messages } from "../common/constant.js";
 
 export const save = async (req) => {
   try {
-    const { name, email, password, phone } = req?.body;
+    const { name, email, password, role, phone } = req?.body;
     const existingUser = await UserSchemaModel.findOne({ email });
     if (existingUser) {
       return { success: false, message: messages.already_registered };
@@ -16,6 +16,8 @@ export const save = async (req) => {
       email,
       password: encryptedPassword,
       phone,
+      role,
+
     });
 
     return await userModel.save();
@@ -39,7 +41,7 @@ export const fetch = async (req) => {
 export const fetchById = async (id) => {
   try {
     const user = await UserSchemaModel.findById(id);
-    return user; 
+    return user;
   } catch (error) {
     throw new Error(messages.fetching_failed + error.message);
   }
@@ -61,10 +63,10 @@ export const login = async (email, password) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      role: user.role,
     };
 
-    const jwtToken = jwt.sign(payload, process.env.SECRET, { expiresIn: '1h' });
-    
+    const jwtToken = jwt.sign(payload, process.env.SECRET, { expiresIn: "1h" });
 
     return { success: true, jwtToken, user: payload };
   } catch (error) {
@@ -74,17 +76,17 @@ export const login = async (email, password) => {
 
 export const update = async (id, updateData) => {
   try {
-      const updatedUser = await UserSchemaModel.findByIdAndUpdate(
-          id,
-          updateData,
-          { new: true }
-      );
-      if (!updatedUser || updatedUser.isDeleted) {
-          throw new Error(messages.data_not_found);
-      }
-      return updatedUser;
+    const updatedUser = await UserSchemaModel.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true }
+    );
+    if (!updatedUser || updatedUser.isDeleted) {
+      throw new Error(messages.data_not_found);
+    }
+    return updatedUser;
   } catch (error) {
-      throw new Error(messages.data_add_error);
+    throw new Error(messages.data_add_error);
   }
 };
 
@@ -98,8 +100,11 @@ export const deleteById = async (id) => {
   return user;
 };
 
-
-export const changePasswordService = async (userId, currentPassword, newPassword) => {
+export const changePasswordService = async (
+  userId,
+  currentPassword,
+  newPassword
+) => {
   try {
     const user = await UserSchemaModel.findById(userId);
     if (!user) {
