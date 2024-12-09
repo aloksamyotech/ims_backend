@@ -1,12 +1,14 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv/config";
 import Admin from '../models/master.js'; 
+import UserSchemaModel from "../models/user.js";
 
 const defaultAdmin = {
-  username: 'admin',   
+  name: 'Admin',   
   phone: '9876376321',
   email: 'admin@gmail.com', 
-  password: 'admin1234', 
+  password: 'admin123', 
+  role : 'admin'
 };
 
 export const connectDb = async () => {
@@ -16,9 +18,9 @@ export const connectDb = async () => {
     console.log("DB connected successfully");
     const adminExists = await Admin.findOne({ role: 'admin' });
     if (!adminExists) {
-      const admin = new Admin(defaultAdmin);
+      const admin = new UserSchemaModel(defaultAdmin);
       await admin.save();
-      console.log("Default master data created");
+      console.log("admin created successfully");
     }
   } catch (error) {
     console.log("Error connection mongodb" + error);
