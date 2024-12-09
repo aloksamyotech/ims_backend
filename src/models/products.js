@@ -2,9 +2,15 @@ import mongoose from "mongoose";
 import uniqueValidator from "mongoose-unique-validator";
 import { tableNames } from "../common/constant.js";
 import CategorySchemaModel from "./category.js";
+import UserSchemaModel from "./user.js";
 
 const ProductSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: tableNames.users,
+      required: true,
+    },
     productnm: {
       type: String,
       required: true,
@@ -24,10 +30,10 @@ const ProductSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    quantity: { 
+    quantity: {
       type: Number,
-       required: true, 
-       default: 0,
+      required: true,
+      default: 0,
     },
     product_no: {
       type: String,
@@ -63,7 +69,6 @@ const ProductSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-
 ProductSchema.plugin(uniqueValidator);
 
 const generateProductNumber = async () => {
@@ -84,25 +89,33 @@ ProductSchema.pre("save", async function (next) {
       this.product_no = await generateProductNumber();
     }
 
-  if (this.categoryId) {
-    const category = await CategorySchemaModel.findById(this.categoryId);
-    this.categoryName = category ? category.catnm : null; 
-  }
+    if (this.categoryId) {
+      const category = await CategorySchemaModel.findById(this.categoryId);
+      this.categoryName = category ? category.catnm : null;
+    }
 
-  if (this.productnm) {
-    this.slug = this.productnm
-      .toString()
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^\w\-]+/g, "")
-      .replace(/\--+/g, "-")
-      .replace(/^-+/, "")
-      .replace(/-+$/, "");
+    if (this.userId) {
+      const user = await UserSchemaModel.findById(this.userId);
+      if (!user) {
+        return next(new Error("User not found"));
+      }
+      this.userId = user?._id;
+    }
+
+    if (this.productnm) {
+      this.slug = this.productnm
+        .toString()
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w\-]+/g, "")
+        .replace(/\--+/g, "-")
+        .replace(/^-+/, "")
+        .replace(/-+$/, "");
+    }
+    next();
+  } catch (error) {
+    next(error);
   }
-  next();
-} catch (error) {
-  next(error);
-}
 });
 
 const ProductSchemaModel = mongoose.model(tableNames.products, ProductSchema);

@@ -1,12 +1,18 @@
 import { messages } from "../common/constant.js";
 import CategorySchemaModel from "../models/category.js";
+import UserSchemaModel from "../models/user.js";
 
 export const save = async (req) => {
   try {
-    const { catnm, desc } = req?.body;
+    const { catnm, desc ,userId } = req?.body;
+    const user = await UserSchemaModel.findById(userId);
+    if (!user) {
+      throw new Error(messages.data_not_found);
+    }
     const categoryModel = CategorySchemaModel({
       catnm,
       desc,
+      userId,
     });
     return await categoryModel.save();
   } catch (error) {

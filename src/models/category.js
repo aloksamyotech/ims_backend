@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import uniqueValidator from "mongoose-unique-validator";
 import { tableNames } from "../common/constant.js";
+import UserSchemaModel from "./user.js";
 
 const CategorySchema = new mongoose.Schema(
   {
@@ -18,6 +19,11 @@ const CategorySchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: tableNames.users,
+      required: true,
+    },
     isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }
@@ -25,7 +31,8 @@ const CategorySchema = new mongoose.Schema(
 
 CategorySchema.plugin(uniqueValidator);
 
-CategorySchema.pre("save", function (next) {
+CategorySchema.pre("save",async function (next) {
+  try {
   if (this.catnm) {
     this.slug = this.catnm
       .toString()
@@ -36,7 +43,18 @@ CategorySchema.pre("save", function (next) {
       .replace(/^-+/, "")
       .replace(/-+$/, "");
   }
+
+  if (this.userId) {
+    const user = await UserSchemaModel.findById(this.userId);
+    if (!user) {
+      return next(new Error("User not found"));
+    }
+    this.userId = user?._id;
+  }
   next();
+} catch (error) {
+  next(error);
+}
 });
 
 const CategorySchemaModel = mongoose.model(tableNames.pcategory, CategorySchema);

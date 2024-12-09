@@ -1,5 +1,6 @@
 import { messages } from "../common/constant.js";
 import SupplierSchemaModel from "../models/supplier.js";
+import UserSchemaModel from "../models/user.js";
 
 export const save = async (req) => {
   try {
@@ -13,7 +14,12 @@ export const save = async (req) => {
       bankName,
       accountHolder,
       accountNumber,
+      userId
     } = req?.body;
+    const user = await UserSchemaModel.findById(userId);
+    if (!user) {
+      throw new Error(messages.data_not_found);
+    }
     const supplierModel = new SupplierSchemaModel({
       suppliernm,
       email,
@@ -24,6 +30,7 @@ export const save = async (req) => {
       bankName,
       accountHolder,
       accountNumber,
+      userId
     });
     return await supplierModel.save();
   } catch (error) {

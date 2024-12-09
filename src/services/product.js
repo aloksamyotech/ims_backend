@@ -2,6 +2,7 @@ import ProductSchemaModel from "../models/products.js";
 import { image_url, messages, tableNames } from "../common/constant.js";
 import CategorySchemaModel from "../models/category.js";
 import mongoose from "mongoose";
+import UserSchemaModel from "../models/user.js";
 
 export const save = async (req) => {
   try {
@@ -14,10 +15,17 @@ export const save = async (req) => {
       margin,
       notes,
       categoryId,
+      userId
     } = req?.body;
 
     const category = await CategorySchemaModel.findById(categoryId);
     if (!category) {
+      throw new Error(messages.data_not_found);
+    }
+
+    
+    const user = await UserSchemaModel.findById(userId);
+    if (!user) {
       throw new Error(messages.data_not_found);
     }
 
@@ -32,6 +40,7 @@ export const save = async (req) => {
       categoryId: category._id,
       categoryName: category.catnm,
       image: req.file ? req.file.path : null,
+      userId
     });
     return await productModel.save();
   } catch (error) {

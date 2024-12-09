@@ -3,6 +3,7 @@ import { tableNames , messages} from "../common/constant.js";
 import SupplierSchemaModel from "../models/supplier.js";
 import ProductSchemaModel from "../models/products.js";
 import mongoose from "mongoose";
+import UserSchemaModel from "../models/user.js";
 
 export const save = async (req) => {
   try {
@@ -14,10 +15,16 @@ export const save = async (req) => {
       subtotal,
       tax,
       supplierId,
+      userId
     } = req?.body;
 
     const supplier = await SupplierSchemaModel.findById(supplierId);
     if (!supplier) {
+      throw new Error(messages.data_not_found);
+    }
+
+    const user = await UserSchemaModel.findById(userId);
+    if (!user) {
       throw new Error(messages.data_not_found);
     }
 
@@ -44,6 +51,7 @@ export const save = async (req) => {
       total,
       subtotal,
       tax,
+      userId: userId,
       supplierId: supplier._id,
       supplierName: supplier.suppliernm,
       supplierEmail: supplier.email,
@@ -83,6 +91,7 @@ export const fetch = async (req) => {
           subtotal: 1,
           tax: 1,
           total: 1,
+          userId: 1,
           supplierId: 1,
           supplierName: 1,
           supplierEmail: 1,
@@ -145,6 +154,7 @@ export const fetchById = async (id) => {
           subtotal: 1,
           tax: 1,
           total: 1,
+          userId: 1,
           supplierId: 1,
           supplierName: 1,
           supplierEmail: 1,

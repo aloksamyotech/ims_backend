@@ -9,6 +9,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import moment from "moment";
+import UserSchemaModel from "../models/user.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -100,11 +101,16 @@ const generateInvoicePDF = async (orderData) => {
 
 export const save = async (req) => {
   try {
-    const { date, products, order_status, total, subtotal, tax, customerId } =
+    const { date, products, order_status, total, subtotal, tax, customerId , userId} =
       req?.body;
 
     const customer = await CustomerSchemaModel.findById(customerId);
     if (!customer) {
+      throw new Error(messages.data_not_found);
+    }
+
+    const user = await UserSchemaModel.findById(userId);
+    if (!user) {
       throw new Error(messages.data_not_found);
     }
 
@@ -136,6 +142,7 @@ export const save = async (req) => {
       customerEmail: customer.email,
       customerPhone: customer.phone,
       customerAddress: customer.address,
+      userId:userId,
     });
 
     const savedOrder = await orderModel.save();
@@ -178,6 +185,7 @@ export const fetch = async (req) => {
           subtotal: 1,
           tax: 1,
           total: 1,
+          userId: 1, 
           customerId: 1,
           customerName: 1,
           customerEmail: 1,
@@ -241,6 +249,7 @@ export const fetchById = async (id) => {
           subtotal: 1,
           tax: 1,
           total: 1,
+          userId: 1, 
           customerId: 1,
           customerName: 1,
           customerEmail: 1,

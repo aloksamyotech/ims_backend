@@ -12,6 +12,7 @@ import productRouter from "./src/routes/product.js";
 import orderRouter from "./src/routes/orders.js";
 import purchaseRouter from "./src/routes/purchase.js";
 import adminRouter from "./src/routes/master.js";
+import subscriptionRouter from "./src/routes/subscription.js";
 import multer from "multer";
 
 const app = express();
@@ -31,6 +32,7 @@ app.use("/product", productRouter);
 app.use("/order", orderRouter);
 app.use("/purchase", purchaseRouter);
 app.use("/admin", adminRouter);
+app.use("/subscription", subscriptionRouter);
 
 connectDb();
 const port = process.env.PORT;

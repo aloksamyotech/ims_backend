@@ -1,9 +1,15 @@
 import mongoose from "mongoose";
 import uniqueValidator from "mongoose-unique-validator";
 import { tableNames } from "../common/constant.js";
+import UserSchemaModel from "./user.js";
 
 const CustomerSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: tableNames.users,
+      required: true,
+    },
     customernm: {
       type: String,
       required: true,
@@ -51,6 +57,21 @@ const CustomerSchema = new mongoose.Schema(
 );
 
 CustomerSchema.plugin(uniqueValidator);
+
+CustomerSchema.pre("save",async function (next) {
+  try {
+  if (this.userId) {
+    const user = await UserSchemaModel.findById(this.userId);
+    if (!user) {
+      return next(new Error("User not found"));
+    }
+    this.userId = user?._id;
+  }
+  next();
+} catch (error) {
+  next(error);
+}
+});
 
 const CustomerSchemaModel = mongoose.model(tableNames.customer, CustomerSchema);
 

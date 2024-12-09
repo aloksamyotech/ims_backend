@@ -3,6 +3,7 @@ import uniqueValidator from "mongoose-unique-validator";
 import { tableNames } from "../common/constant.js";
 import ProductSchemaModel from "./products.js";
 import CustomerSchemaModel from "./customer.js";
+import UserSchemaModel from "./user.js";
 
 const ProductOrderSchema = new mongoose.Schema({
   productId: {
@@ -30,6 +31,11 @@ const ProductOrderSchema = new mongoose.Schema({
 
 const OrderSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: tableNames.users,
+      required: true,
+    },
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: tableNames.customer,
@@ -121,6 +127,15 @@ OrderSchema.pre("save", async function (next) {
       this.customerPhone = customer ? customer.phone : null;
       this.customerAddress = customer ? customer.address : null;
     }
+
+    if (this.userId) {
+      const user = await UserSchemaModel.findById(this.userId);
+      if (!user) {
+        return next(new Error("User not found"));
+      }
+      this.userId = user?._id;
+    }
+
     next();
   } catch (error) {
     next(error);

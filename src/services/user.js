@@ -66,7 +66,7 @@ export const login = async (email, password) => {
       role: user.role,
     };
 
-    const jwtToken = jwt.sign(payload, process.env.SECRET, { expiresIn: "1h" });
+    const jwtToken = jwt.sign(payload, process.env.SECRET);
 
     return { success: true, jwtToken, user: payload };
   } catch (error) {
