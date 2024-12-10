@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
     phone: {
       type: Number,
@@ -28,8 +28,8 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['user' ,'admin'],
-      default:'user',
+      enum: ["user", "admin" , "employee"],
+      default: "user",
     },
     isDeleted: { type: Boolean, default: false },
   },
