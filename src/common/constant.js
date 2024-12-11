@@ -53,6 +53,7 @@ export const messages = {
   required : "This is required.",
   not_available: "Data not available",
   invalid_format: "Invalid data format",
+  account_inactive: "Your account is inactive. Please contact the administrator.",
 };
 
 export const image_url = {  url :"http://localhost:4200/" , };

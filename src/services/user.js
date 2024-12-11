@@ -17,7 +17,6 @@ export const save = async (req) => {
       password: encryptedPassword,
       phone,
       role,
-
     });
 
     return await userModel.save();
@@ -53,6 +52,10 @@ export const login = async (email, password) => {
 
     if (!user) {
       return { success: false, message: messages.user_not_found };
+    }
+
+    if (!user.isActive) {
+      return { success: false, message: messages.account_inactive };
     }
 
     const decryptedPassword = decryptText(user.password);
@@ -124,5 +127,27 @@ export const changePasswordService = async (
     return { success: true, message: messages.password_changed_successfully };
   } catch (error) {
     return { success: false, message: messages.server_error };
+  }
+};
+
+export const updateStatus = async (id, isActive) => {
+  try {
+    if (typeof isActive !== "boolean") {
+      throw new Error("Invalid isActive value. It must be a boolean.");
+    }
+
+    const updatedUser = await UserSchemaModel.findByIdAndUpdate(
+      id,
+      { isActive },
+      { new: true }
+    );
+
+    if (!updatedUser || updatedUser.isDeleted) {
+      throw new Error(messages.data_not_found);
+    }
+
+    return updatedUser;
+  } catch (error) {
+    throw new Error(messages.data_add_error);
   }
 };
