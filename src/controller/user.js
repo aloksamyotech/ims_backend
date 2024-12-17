@@ -7,6 +7,7 @@ import {
   fetchById,
   changePasswordService,
   updateStatus,
+  countCompany
 } from "../services/user.js";
 import { messages, statusCodes } from "../common/constant.js";
 
@@ -149,6 +150,22 @@ export const changeCompanyStatus = async (req, res) => {
     return res.status(statusCodes.ok).json({ success: true, data: updatedUser });
   } catch (error) {
     return res.status(statusCodes.internalServerError).json({
+      message: messages.fetching_failed,
+    });
+  }
+};
+
+export const getCompanyCount = async (req, res) => {
+  try {
+    const companyCount = await countCompany();
+    res.status(statusCodes.ok).json({
+      success: true,
+      message: messages.fetching_success,
+      count: companyCount,
+    });
+  } catch (error) {
+    res.status(statusCodes.internalServerError).json({
+      success: false,
       message: messages.fetching_failed,
     });
   }

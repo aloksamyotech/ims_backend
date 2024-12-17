@@ -151,3 +151,15 @@ export const updateStatus = async (id, isActive) => {
     throw new Error(messages.data_add_error);
   }
 };
+
+export const countCompany = async (req) => {
+  try {
+    const companyCount = await UserSchemaModel.countDocuments({ isDeleted: false , role: 'user' });
+    if (companyCount === 0) {
+      return 0;
+    }
+    return companyCount;
+  } catch (error) {
+    throw new Error(messages.data_not_found);
+  }
+};

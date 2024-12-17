@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import uniqueValidator from "mongoose-unique-validator";
 import { tableNames } from "../common/constant.js";
 import UserSchemaModel from "./user.js";
 
@@ -18,7 +17,6 @@ const SupplierSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
-      unique: true,
       trim: true,
     },
     phone: {
@@ -61,9 +59,6 @@ const SupplierSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-SupplierSchema.plugin(uniqueValidator);
-
 
 SupplierSchema.pre("save",async function (next) {
   try {

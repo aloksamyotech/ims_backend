@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import uniqueValidator from "mongoose-unique-validator";
 import { tableNames } from "../common/constant.js";
 
 const SubscriptionSchema = new mongoose.Schema(
@@ -32,8 +31,6 @@ const SubscriptionSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-SubscriptionSchema.plugin(uniqueValidator);
 
 const SubscriptionSchemaModel = mongoose.model(tableNames.subscription, SubscriptionSchema);
 

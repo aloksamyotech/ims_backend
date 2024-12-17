@@ -54,6 +54,7 @@ export const messages = {
   not_available: "Data not available",
   invalid_format: "Invalid data format",
   account_inactive: "Your account is inactive. Please contact the administrator.",
+  already_exist: 'Already exist',
 };
 
 export const image_url = {  url :"http://localhost:4200/" , };

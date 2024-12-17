@@ -4,7 +4,7 @@ import { tableNames } from "../common/constant.js";
 
 const adminSchema = new mongoose.Schema(
   {
-    username: {
+    name: {
       type: String,
       required: true,
       unique: true,

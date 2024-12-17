@@ -3,19 +3,27 @@ import CategorySchemaModel from "../models/category.js";
 import UserSchemaModel from "../models/user.js";
 
 export const save = async (req) => {
+  const { catnm, desc, userId } = req.body; 
+
   try {
-    const { catnm, desc ,userId } = req?.body;
-    const user = await UserSchemaModel.findById(userId);
-    if (!user) {
-      throw new Error(messages.data_not_found);
+    const existingCategory = await CategorySchemaModel.findOne({
+      catnm,
+      userId,
+      isDeleted: false
+    });
+
+    if (existingCategory) {
+      return { message: messages.already_exist };
     }
-    const categoryModel = CategorySchemaModel({
+    const categoryModel = new CategorySchemaModel({
       catnm,
       desc,
       userId,
     });
+
     return await categoryModel.save();
   } catch (error) {
+    console.log(error);
     return error;
   }
 };

@@ -49,3 +49,5 @@ export const deleteCategory = async (req, res) => {
       res.status(statusCodes.internalServerError).json({ error: error.message });
   }
 };
+
+

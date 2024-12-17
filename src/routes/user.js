@@ -11,5 +11,6 @@ userRouter.patch('/update/:id',UserController.updateUser);
 userRouter.delete("/deleteById/:id", UserController.deleteUser);
 userRouter.put("/change-password", authenticateJWT, UserController.changePassword);
 userRouter.patch('/change-status/:id',UserController.changeCompanyStatus);
+userRouter.get("/count", UserController.getCompanyCount);
 
 export default userRouter;
