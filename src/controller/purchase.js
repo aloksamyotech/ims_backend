@@ -86,7 +86,14 @@ export const updatePurchaseStatus = async (req, res) => {
 
 export const getPurchaseCount = async (req, res) => {
   try {
-    const purchaseCount = await countPurchases();
+    const purchaseCount = await countPurchases(req);
+    if (purchaseCount === 0) {
+      return res.status(statusCodes.ok).json({
+        success: true,
+        message: messages.data_not_found,
+        count: 0,
+      });
+    }
     res.status(statusCodes.ok).json({
       success: true,
       message: messages.fetching_success,

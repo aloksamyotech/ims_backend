@@ -94,15 +94,22 @@ export const deleteById = async (id) => {
 
 export const countCustomer = async (req) => {
   try {
-    const customerCount = await CustomerSchemaModel.countDocuments({ isDeleted: false });
-    if (customerCount === 0) {
-      return 0;
+    const { userId } = req?.query;
+    if (!userId) {
+      throw new Error("userId is required");
     }
-    return customerCount;
+
+    const customerCount = await CustomerSchemaModel.find({ 
+      isDeleted: false,
+      userId: userId 
+    });
+
+    return customerCount.length;
   } catch (error) {
     throw new Error(messages.data_not_found);
   }
 };
+
 
 
 

@@ -239,11 +239,15 @@ export const handlePurchaseStatus = async (id, action) => {
 
 export const countPurchases = async (req) => {
   try {
-    const purchaseCount = await PurchaseSchemaModel.countDocuments({ isDeleted: false });
-    if (purchaseCount === 0) {
-      return 0;
+    const { userId } = req?.query;
+    if (!userId) {
+      throw new Error("userId is required");
     }
-    return purchaseCount;
+    const purchaseCount = await PurchaseSchemaModel.find({ 
+      isDeleted: false,
+      userId: userId 
+    });
+    return purchaseCount.length;
   } catch (error) {
     throw new Error(messages.data_not_found);
   }

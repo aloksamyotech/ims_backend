@@ -75,19 +75,29 @@ export const deleteCustomer = async (req, res) => {
 
 export const getCustomerCount = async (req, res) => {
   try {
-    const customerCount = await countCustomer();
+    const customerCount = await countCustomer(req);
+    if (customerCount === 0) {
+      return res.status(statusCodes.ok).json({
+        success: true,
+        message: messages.data_not_found,
+        count: 0,
+      });
+    }
+
     res.status(statusCodes.ok).json({
       success: true,
       message: messages.fetching_success,
       count: customerCount,
     });
   } catch (error) {
+    console.log(error);
     res.status(statusCodes.internalServerError).json({
       success: false,
       message: messages.fetching_failed,
     });
   }
 };
+
 
 
 

@@ -84,16 +84,26 @@ export const deleteSupplier = async (req, res) => {
 
 export const getSupplierCount = async (req, res) => {
   try {
-    const supplierCount = await countSupplier();
-    res.status(statusCodes.ok).json({
-      success: true,
-      message: messages.fetching_success,
-      count: supplierCount,
-    });
-  } catch (error) {
-    res.status(statusCodes.internalServerError).json({
-      success: false,
-      message: messages.fetching_failed,
-    });
-  }
-};
+    const supplierCount = await countSupplier(req);
+       if (supplierCount === 0) {
+         return res.status(statusCodes.ok).json({
+           success: true,
+           message: messages.data_not_found,
+           count: 0,
+         });
+       }
+   
+       res.status(statusCodes.ok).json({
+         success: true,
+         message: messages.fetching_success,
+         count: supplierCount,
+       });
+     } catch (error) {
+       console.log(error);
+       res.status(statusCodes.internalServerError).json({
+         success: false,
+         message: messages.fetching_failed,
+       });
+     }
+   };
+

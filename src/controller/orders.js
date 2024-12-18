@@ -86,7 +86,14 @@ export const updateOrderStatus = async (req, res) => {
 
 export const getOrderCount = async (req, res) => {
   try {
-    const orderCount = await countOrders();
+    const orderCount = await countOrders(req);
+    if (orderCount === 0) {
+      return res.status(statusCodes.ok).json({
+        success: true,
+        message: messages.data_not_found,
+        count: 0,
+      });
+    }
     res.status(statusCodes.ok).json({
       success: true,
       message: messages.fetching_success,

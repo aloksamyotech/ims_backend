@@ -12,11 +12,17 @@ const CustomerSchema = new mongoose.Schema(
     customernm: {
       type: String,
       required: true,
+      required: function () {
+        return this.isWholesale === true;
+      },
       trim: true,
     },
     email: {
       type: String,
       required: true,
+      required: function () {
+        return this.isWholesale === true; 
+      },
       trim: true,
     },
     phone: {
@@ -27,6 +33,9 @@ const CustomerSchema = new mongoose.Schema(
     address: {
       type: String,
       required: true,
+      required: function () {
+        return this.isWholesale === true; 
+      },
       trim: true,
     },
     isWholesale: {

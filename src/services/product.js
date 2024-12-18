@@ -50,7 +50,7 @@ export const save = async (req) => {
 
 export const fetch = async (req) => {
   try {
-    const condition_obj = { ...req.query, isDeleted: false };
+    const condition_obj = { ...req?.query, isDeleted: false };
 
     const pipeline = [
       { $match: condition_obj },

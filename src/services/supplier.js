@@ -86,11 +86,17 @@ export const deleteById = async (id) => {
 
 export const countSupplier = async (req) => {
   try {
-    const supplierCount = await SupplierSchemaModel.countDocuments({ isDeleted: false });
-    if (supplierCount === 0) {
-      return 0;
+    const { userId } = req?.query;
+    if (!userId) {
+      throw new Error("userId is required");
     }
-    return supplierCount;
+
+    const supplierCount = await SupplierSchemaModel.find({ 
+      isDeleted: false,
+      userId: userId 
+    });
+
+    return supplierCount.length;
   } catch (error) {
     throw new Error(messages.data_not_found);
   }

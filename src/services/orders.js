@@ -126,7 +126,7 @@ export const save = async (req) => {
         productName: dbProduct.productnm,
         categoryName: dbProduct.categoryName,
         quantity: product.quantity,
-        price: dbProduct.buyingPrice,
+        price: dbProduct.sellingPrice,
       });
     }
 
@@ -342,11 +342,15 @@ export const handleOrderStatus = async (id, action) => {
 
 export const countOrders = async (req) => {
   try {
-    const orderCount = await OrderSchemaModel.countDocuments({ isDeleted: false });
-    if (orderCount === 0) {
-      return 0;
+    const { userId } = req?.query;
+    if (!userId) {
+      throw new Error("userId is required");
     }
-    return orderCount;
+    const orderCount = await OrderSchemaModel.find({ 
+      isDeleted: false,
+      userId: userId 
+    });
+    return orderCount.length;
   } catch (error) {
     throw new Error(messages.data_not_found);
   }
