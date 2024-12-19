@@ -39,18 +39,18 @@ const SupplierSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    bankName: {
-      type: String,
-      trim: true,
-    },
-    accountHolder: {
-      type: String,
-      trim: true,
-    },
-    accountNumber: {
-      type: Number,
-      trim: true,
-    },
+    // bankName: {
+    //   type: String,
+    //   trim: true,
+    // },
+    // accountHolder: {
+    //   type: String,
+    //   trim: true,
+    // },
+    // accountNumber: {
+    //   type: Number,
+    //   trim: true,
+    // },
     isActive: {
       type: Boolean,
       default: true,

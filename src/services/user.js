@@ -65,6 +65,7 @@ export const login = async (email, password) => {
     const payload = {
       _id: user._id,
       name: user.name,
+      phone: user.phone,
       email: user.email,
       role: user.role,
     };

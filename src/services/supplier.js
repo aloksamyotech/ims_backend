@@ -11,9 +11,6 @@ export const save = async (req) => {
       address,
       typeOfSupplier,
       shopName,
-      bankName,
-      accountHolder,
-      accountNumber,
       userId
     } = req?.body;
     const user = await UserSchemaModel.findById(userId);
@@ -27,9 +24,6 @@ export const save = async (req) => {
       address,
       typeOfSupplier,
       shopName,
-      bankName,
-      accountHolder,
-      accountNumber,
       userId
     });
     return await supplierModel.save();
@@ -95,6 +89,10 @@ export const countSupplier = async (req) => {
       isDeleted: false,
       userId: userId 
     });
+
+    if (supplierCount === 0) {
+      return { message: messages.data_not_found};
+    }
 
     return supplierCount.length;
   } catch (error) {

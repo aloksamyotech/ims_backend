@@ -350,6 +350,10 @@ export const countOrders = async (req) => {
       isDeleted: false,
       userId: userId 
     });
+
+    if (orderCount === 0) {
+      return { message: messages.data_not_found};
+    }
     return orderCount.length;
   } catch (error) {
     throw new Error(messages.data_not_found);

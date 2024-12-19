@@ -10,9 +10,6 @@ export const save = async (req) => {
       phone,
       address,
       isWholesale,
-      accountHolder,
-      accountNumber,
-      bankName,
       userId,
     } = req?.body;
 
@@ -26,9 +23,6 @@ export const save = async (req) => {
       phone,
       address,
       isWholesale,
-      accountHolder,
-      accountNumber,
-      bankName,
       userId
     });
 
@@ -103,6 +97,10 @@ export const countCustomer = async (req) => {
       isDeleted: false,
       userId: userId 
     });
+
+    if (customerCount === 0) {
+      return { message: messages.data_not_found};
+    }
 
     return customerCount.length;
   } catch (error) {

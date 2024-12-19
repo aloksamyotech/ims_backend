@@ -247,6 +247,11 @@ export const countPurchases = async (req) => {
       isDeleted: false,
       userId: userId 
     });
+    
+    if (purchaseCount === 0) {
+      return { message: messages.data_not_found};
+    }
+
     return purchaseCount.length;
   } catch (error) {
     throw new Error(messages.data_not_found);
