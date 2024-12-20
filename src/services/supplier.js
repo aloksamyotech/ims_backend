@@ -32,18 +32,36 @@ export const save = async (req) => {
   }
 };
 
+// export const fetch = async (req) => {
+//   try {
+//     const condition_obj = req?.query;
+//     const suppliersList = await SupplierSchemaModel.find({
+//       ...condition_obj,
+//       isDeleted: false,
+//     });
+//     return suppliersList;
+//   } catch (error) {
+//     throw new Error(messages.fetching_failed);
+//   }
+// };
+
 export const fetch = async (req) => {
   try {
-    const condition_obj = req?.query;
-    const suppliersList = await SupplierSchemaModel.find({
-      ...condition_obj,
-      isDeleted: false,
-    });
+    const { userId } = req?.query; 
+    const condition_obj = { isDeleted: false };
+
+    if (userId) {
+      condition_obj.userId = userId; 
+    }
+
+    const suppliersList = await SupplierSchemaModel.find(condition_obj);
+
     return suppliersList;
   } catch (error) {
     throw new Error(messages.fetching_failed);
   }
 };
+
 
 export const fetchById = async (id) => {
   try {

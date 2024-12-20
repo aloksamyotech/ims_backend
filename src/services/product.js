@@ -11,11 +11,12 @@ export const save = async (req) => {
       buyingPrice,
       sellingPrice,
       quantity,
+      quantityAlert,
       tax,
       margin,
       notes,
       categoryId,
-      userId
+      userId,
     } = req?.body;
 
     const category = await CategorySchemaModel.findById(categoryId);
@@ -23,7 +24,6 @@ export const save = async (req) => {
       throw new Error(messages.data_not_found);
     }
 
-    
     const user = await UserSchemaModel.findById(userId);
     if (!user) {
       throw new Error(messages.data_not_found);
@@ -34,13 +34,14 @@ export const save = async (req) => {
       buyingPrice,
       sellingPrice,
       quantity,
+      quantityAlert,
       tax,
       margin,
       notes,
       categoryId: category._id,
       categoryName: category.catnm,
       image: req.file ? req.file.path : null,
-      userId
+      userId,
     });
     return await productModel.save();
   } catch (error) {
@@ -157,10 +158,20 @@ export const deleteById = async (id) => {
 
 export const lowStockProducts = async () => {
   try {
-    const lowStock = await ProductSchemaModel.find({ quantity: { $lt: 5 } });
-    return lowStock; 
+    const outofStock = await ProductSchemaModel.find({ quantity: { $lt: 5 } });
+    return outofStock;
   } catch (error) {
-    throw new Error(messages.data_not_found); 
+    throw new Error(messages.data_not_found);
   }
 };
 
+export const notifyquantityAlert = async (quantityAlert) => {
+  try {
+    const lowStockProducts = await ProductSchemaModel.find({
+      quantity: { $lt: quantityAlert },
+    });
+    return lowStockProducts;
+  } catch (error) {
+    throw new Error(messages.data_not_found);
+  }
+};

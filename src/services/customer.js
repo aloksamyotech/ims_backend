@@ -34,24 +34,25 @@ export const save = async (req) => {
 
 export const fetch = async (req) => {
   try {
-    const { isWholesale } = req?.query;
-    let customersList;
+    const { userId, isWholesale } = req?.query; 
+    const condition_obj = { isDeleted: false }; 
+
+    if (userId) {
+      condition_obj.userId = userId;
+    }
 
     if (isWholesale !== undefined) {
-      customersList = await CustomerSchemaModel.find({
-        isWholesale: isWholesale,
-        isDeleted: false,
-      });
-    } else {
-      customersList = await CustomerSchemaModel.find({
-        isDeleted: false,
-      });
+      condition_obj.isWholesale = isWholesale; 
     }
+
+    const customersList = await CustomerSchemaModel.find(condition_obj);
+
     return customersList;
   } catch (error) {
     throw new Error(messages.fetching_failed);
   }
 };
+
 
 export const fetchById = async (id) => {
   try {
