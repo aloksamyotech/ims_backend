@@ -99,7 +99,6 @@ export const getSupplierCount = async (req, res) => {
          count: supplierCount,
        });
      } catch (error) {
-       console.log(error);
        res.status(statusCodes.internalServerError).json({
          success: false,
          message: messages.fetching_failed,

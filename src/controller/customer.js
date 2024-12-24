@@ -90,7 +90,6 @@ export const getCustomerCount = async (req, res) => {
       count: customerCount,
     });
   } catch (error) {
-    console.log(error);
     res.status(statusCodes.internalServerError).json({
       success: false,
       message: messages.fetching_failed,

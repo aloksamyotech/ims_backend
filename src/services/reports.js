@@ -106,4 +106,11 @@ export const fetchSupplierProductReport = async (req) => {
       throw new Error(messages.fetching_failed + error.message);
     }
   };
+
+  
+  
+  
+ 
+  
+  
   

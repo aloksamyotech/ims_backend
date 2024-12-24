@@ -7,7 +7,6 @@ export const create = async (req, res) => {
     const purchaseResponse = await save(req);
     res.status(statusCodes.created).json(purchaseResponse);
   } catch (error) {
-    console.log(error);
     res.status(statusCodes.internalServerError).json({error: error, });
   }
 };

@@ -32,19 +32,6 @@ export const save = async (req) => {
   }
 };
 
-// export const fetch = async (req) => {
-//   try {
-//     const condition_obj = req?.query;
-//     const suppliersList = await SupplierSchemaModel.find({
-//       ...condition_obj,
-//       isDeleted: false,
-//     });
-//     return suppliersList;
-//   } catch (error) {
-//     throw new Error(messages.fetching_failed);
-//   }
-// };
-
 export const fetch = async (req) => {
   try {
     const { userId } = req?.query; 
@@ -54,9 +41,7 @@ export const fetch = async (req) => {
       condition_obj.userId = userId; 
     }
 
-    const suppliersList = await SupplierSchemaModel.find(condition_obj);
-
-    return suppliersList;
+    return await SupplierSchemaModel.find(condition_obj);
   } catch (error) {
     throw new Error(messages.fetching_failed);
   }

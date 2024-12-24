@@ -101,8 +101,16 @@ const generateInvoicePDF = async (orderData) => {
 
 export const save = async (req) => {
   try {
-    const { date, products, order_status, total, subtotal, tax, customerId , userId} =
-      req?.body;
+    const {
+      date,
+      products,
+      order_status,
+      total,
+      subtotal,
+      tax,
+      customerId,
+      userId,
+    } = req?.body;
 
     const customer = await CustomerSchemaModel.findById(customerId);
     if (!customer) {
@@ -127,6 +135,7 @@ export const save = async (req) => {
         categoryName: dbProduct.categoryName,
         quantity: product.quantity,
         price: dbProduct.sellingPrice,
+        buyingPrice: dbProduct.buyingPrice,
       });
     }
 
@@ -142,7 +151,7 @@ export const save = async (req) => {
       customerEmail: customer.email,
       customerPhone: customer.phone,
       customerAddress: customer.address,
-      userId:userId,
+      userId: userId,
     });
 
     const savedOrder = await orderModel.save();
@@ -159,7 +168,13 @@ export const save = async (req) => {
 
 export const fetch = async (req) => {
   try {
-    const condition_obj = { ...req?.query , isDeleted: false  };
+    const { userId } = req?.query;
+    const condition_obj = { isDeleted: false };
+
+    if (userId) {
+      condition_obj.userId = new mongoose.Types.ObjectId(userId);
+    }
+
     const pipeline = [
       { $match: condition_obj },
       {
@@ -185,7 +200,7 @@ export const fetch = async (req) => {
           subtotal: 1,
           tax: 1,
           total: 1,
-          userId: 1, 
+          userId: 1,
           customerId: 1,
           customerName: 1,
           customerEmail: 1,
@@ -249,7 +264,7 @@ export const fetchById = async (id) => {
           subtotal: 1,
           tax: 1,
           total: 1,
-          userId: 1, 
+          userId: 1,
           customerId: 1,
           customerName: 1,
           customerEmail: 1,
@@ -315,23 +330,23 @@ export const handleOrderStatus = async (id, action) => {
       throw new Error(messages.data_not_found);
     }
     const currentStatus = order?.order_status;
-    
-    if (currentStatus === 'pending') {
+
+    if (currentStatus === "pending") {
       let newStatus;
-      
-      if (action === 'approve') {
-        newStatus = 'completed';
+
+      if (action === "approve") {
+        newStatus = "completed";
         for (const product of order?.products || []) {
-          await updateProductQuantity(product?.productId, product?.quantity);  
+          await updateProductQuantity(product?.productId, product?.quantity);
         }
-      } else if (action === 'cancel') {
-        newStatus = 'cancelled';
+      } else if (action === "cancel") {
+        newStatus = "cancelled";
       } else {
-        throw new Error('Invalid action provided');
+        throw new Error("Invalid action provided");
       }
 
       order.order_status = newStatus;
-      await order.save(); 
+      await order.save();
     }
 
     return order;
@@ -346,13 +361,13 @@ export const countOrders = async (req) => {
     if (!userId) {
       throw new Error("userId is required");
     }
-    const orderCount = await OrderSchemaModel.find({ 
+    const orderCount = await OrderSchemaModel.find({
       isDeleted: false,
-      userId: userId 
+      userId: userId,
     });
 
     if (orderCount === 0) {
-      return { message: messages.data_not_found};
+      return { message: messages.data_not_found };
     }
     return orderCount.length;
   } catch (error) {
@@ -362,21 +377,39 @@ export const countOrders = async (req) => {
 
 export const getTotalSalesForMonth = async (req) => {
   try {
+    const { userId } = req?.query;
+    const condition_obj = { isDeleted: false };
+
+    if (userId) {
+      condition_obj.userId = new mongoose.Types.ObjectId(userId);
+    }
+
     const totalAmount = await OrderSchemaModel.aggregate([
+      { $match: condition_obj },
       {
         $group: {
-          _id: { $month: '$createdAt' },
-          total_sales_amount: { $sum: "$total" }
-        }
+          _id: { $month: "$createdAt" },
+          total_sales_amount: { $sum: "$total" },
+        },
       },
       {
-        $sort: { _id: 1 }
-      }
+        $sort: { _id: 1 },
+      },
     ]);
 
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
     ];
 
     const formattedData = months.map((month, index) => {
@@ -392,28 +425,34 @@ export const getTotalSalesForMonth = async (req) => {
 
 export const getTotalQuantityForMonth = async (req) => {
   try {
+    const { userId } = req?.query;
+
+    const condition_obj = { isDeleted: false, order_status: "completed" };
+
+    if (userId) {
+      condition_obj.userId = new mongoose.Types.ObjectId(userId);
+    }
+
     const totalQuantity = await OrderSchemaModel.aggregate([
       {
-        $match: {
-          order_status: 'completed', 
-        },
+        $match: condition_obj,
       },
       {
-        $unwind: '$products', 
+        $unwind: "$products",
       },
       {
         $group: {
-          _id: { $month: '$createdAt' }, 
-          totalQuantitySold: { $sum: '$products.quantity' },  
+          _id: { $month: "$createdAt" },
+          totalQuantitySold: { $sum: "$products.quantity" },
         },
       },
       {
-        $sort: { _id: 1 }, 
+        $sort: { _id: 1 },
       },
       {
         $project: {
           _id: 0,
-          month: '$_id',
+          month: "$_id",
           totalQuantitySold: 1,
         },
       },
@@ -421,20 +460,44 @@ export const getTotalQuantityForMonth = async (req) => {
 
     const monthlyQuantities = new Array(12).fill(0);
     totalQuantity.forEach((data) => {
-      const monthIndex = data.month - 1;  
-      monthlyQuantities[monthIndex] = data.totalQuantitySold; 
+      const monthIndex = data.month - 1;
+      monthlyQuantities[monthIndex] = data.totalQuantitySold;
     });
-    return monthlyQuantities; 
+    return monthlyQuantities;
   } catch (error) {
     throw new Error(messages.data_not_found);
   }
 };
 
+const calculateProfit = (order) => {
+  try {
+    const totalOrder = order.total;
+    let totalPurchase = 0;
 
+    order.products.forEach((product) => {
+      const costPrice = product.buyingPrice;
+      const quantity = product.quantity;
 
+      const totalPurchaseAmount = costPrice * quantity;
+      totalPurchase += totalPurchaseAmount;
+    });
 
+    const orderProfit = totalOrder - totalPurchase;
+    return orderProfit;
+  } catch (error) {
+    throw new Error(messages.data_not_found);
+  }
+};
 
-
-
-
-
+export const getOrderProfit = async (id) => {
+  try {
+    const order = await OrderSchemaModel.findById(id);
+    if (!order) {
+      return { message: messages.data_not_found };
+    }
+    const profit = calculateProfit(order);
+    return profit;
+  } catch (error) {
+    throw new Error(messages.data_not_found);
+  }
+};

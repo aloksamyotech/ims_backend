@@ -11,6 +11,7 @@ orderRouter.get("/count", OrderController.getOrderCount);
 orderRouter.get("/total-amount", OrderController.getTotalSales);
 orderRouter.get("/total-quantity", OrderController.getTotalQuantity);
 orderRouter.patch("/update-status/:id", OrderController.updateOrderStatus);  
+orderRouter.get("/total-profit/:id", OrderController.getOrderAmount);
 
 export default orderRouter;
 

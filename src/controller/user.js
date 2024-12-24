@@ -50,7 +50,6 @@ export const fetchById_User = async (req, res) => {
 
 export const loginUser = async (req, res) => {
   const { email, password } = req?.body;
-  console.log("this is body===========>>>>", req?.body);
   const result = await login(email, password);
   console.log("result", result);
   if (result.success) {

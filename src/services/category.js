@@ -23,16 +23,20 @@ export const save = async (req) => {
 
     return await categoryModel.save();
   } catch (error) {
-    console.log(error);
     return error;
   }
 };
 
 export const fetch = async (req) => {
   try {
-    const condition_obj = req?.query;
-    const categoryList = await CategorySchemaModel.find({...condition_obj, isDeleted: false,});
-    return categoryList;
+    const { userId } = req?.query; 
+    const condition_obj = { isDeleted: false };
+
+    if (userId) {
+      condition_obj.userId = userId; 
+    }
+
+    return await CategorySchemaModel.find(condition_obj);
   } catch (error) {
     return error;
   }

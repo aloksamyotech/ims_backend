@@ -10,6 +10,7 @@ productRouter.get("/fetchById/:id",ProductController.fetchById_product);
 productRouter.get("/lowstock",ProductController.getLowStockCount);
 productRouter.get("/quantityalert",ProductController.alertLowStock);
 productRouter.delete("/deleteById/:id",ProductController.deleteProduct);
+productRouter.patch("/handleavgcost",ProductController.handlePurchase);
 
 export default productRouter;
 

@@ -1,5 +1,5 @@
 import { save , fetch , deleteById , fetchById, handleOrderStatus , countOrders,
-   getTotalSalesForMonth , getTotalQuantityForMonth} from "../services/orders.js";
+   getTotalSalesForMonth , getTotalQuantityForMonth , getOrderProfit} from "../services/orders.js";
 import { fetchCustomerProductReport } from "../services/reports.js";
 import { statusCodes, messages } from "../common/constant.js";
 
@@ -110,7 +110,7 @@ export const getOrderCount = async (req, res) => {
 
 export const getTotalSales = async (req, res) => {
   try {
-    const salesData = await getTotalSalesForMonth();
+    const salesData = await getTotalSalesForMonth(req);
     res.status(statusCodes.ok).json({
       success: true,
       data: salesData
@@ -125,7 +125,7 @@ export const getTotalSales = async (req, res) => {
 
 export const getTotalQuantity = async (req, res) => {
   try {
-    const salesData = await getTotalQuantityForMonth();
+    const salesData = await getTotalQuantityForMonth(req);
     res.status(statusCodes.ok).json({
       success: true,
       data: salesData
@@ -138,4 +138,27 @@ export const getTotalQuantity = async (req, res) => {
   }
 };
 
+export const getOrderAmount = async (req,res) => {
+  try{
+    const { id } = req.params; 
+    if (!id) {
+      return res.status(statusCodes.badRequest).json({
+        success: false,
+        message: "Order ID is required.",
+      });
+    }
+    const profit = await getOrderProfit(id);
+    console.log(profit);
+    res.status(statusCodes.ok).json({
+      success: true,
+      data: profit
+    });
+  }
+  catch(error){
+    res.status(statusCodes.internalServerError).json({
+      success: false,
+      message: messages.internalServerError
+    });
+  }
+};
 

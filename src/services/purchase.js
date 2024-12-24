@@ -4,6 +4,7 @@ import SupplierSchemaModel from "../models/supplier.js";
 import ProductSchemaModel from "../models/products.js";
 import mongoose from "mongoose";
 import UserSchemaModel from "../models/user.js";
+import { updateAvgCost } from "./product.js";
 
 export const save = async (req) => {
   try {
@@ -65,7 +66,13 @@ export const save = async (req) => {
 
 export const fetch = async (req) => {
   try {
-    const condition_obj = { ...req.query , isDeleted : false};
+    const { userId } = req?.query;
+        const condition_obj = { isDeleted: false };
+    
+        if (userId) {
+          condition_obj.userId = new mongoose.Types.ObjectId(userId);
+        }
+        
     const pipeline = [
       { $match: condition_obj },
       {
@@ -220,7 +227,8 @@ export const handlePurchaseStatus = async (id, action) => {
       if (action === 'approve') {
         purchase.status = 'completed';
         for (const product of purchase?.products || []) {
-          await updateProductQuantity(product?.productId, product?.quantity);  
+          await updateProductQuantity(product?.productId, product?.quantity); 
+          await updateAvgCost(product?.productId, product?.quantity, product?.price); 
         }
       } else if (action === 'cancel') {
         purchase.status = 'cancelled';

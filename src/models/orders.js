@@ -27,6 +27,10 @@ const ProductOrderSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  buyingPrice: {
+    type: Number,
+    required: true,
+  }
 });
 
 const OrderSchema = new mongoose.Schema(
@@ -114,6 +118,8 @@ OrderSchema.pre("save", async function (next) {
       this.productId = product?._id;
       this.productName = product?.productnm;
       this.categoryName = product?.categoryName;
+      this.price = product?.sellingPrice;
+      this.buyingPrice = product?.buyingPrice;
     }
 
     if (this.customerId) {

@@ -30,6 +30,10 @@ const ProductSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    avgCost: {
+      type: Number,
+      default: 0,
+    },
     quantity: {
       type: Number,
       required: true,

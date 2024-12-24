@@ -17,6 +17,7 @@ export const save = async (req) => {
       notes,
       categoryId,
       userId,
+      avgCost,
     } = req?.body;
 
     const category = await CategorySchemaModel.findById(categoryId);
@@ -42,6 +43,7 @@ export const save = async (req) => {
       categoryName: category.catnm,
       image: req.file ? req.file.path : null,
       userId,
+      avgCost,
     });
     return await productModel.save();
   } catch (error) {
@@ -51,7 +53,12 @@ export const save = async (req) => {
 
 export const fetch = async (req) => {
   try {
-    const condition_obj = { ...req?.query, isDeleted: false };
+    const { userId } = req?.query;
+    const condition_obj = { isDeleted: false };
+
+    if (userId) {
+      condition_obj.userId = new mongoose.Types.ObjectId(userId);
+    }
 
     const pipeline = [
       { $match: condition_obj },
@@ -80,7 +87,6 @@ export const fetch = async (req) => {
         $sort: { createdAt: -1 },
       },
     ];
-
     return await ProductSchemaModel.aggregate(pipeline);
   } catch (error) {
     throw new Error(messages.fetching_failed + error.message);
@@ -156,22 +162,63 @@ export const deleteById = async (id) => {
   return product;
 };
 
-export const lowStockProducts = async () => {
+export const lowStockProducts = async (req) => {
   try {
-    const outofStock = await ProductSchemaModel.find({ quantity: { $lt: 5 } });
+    const { userId } = req?.query;
+    if (!userId) {
+      throw new Error("userId is required");
+    }
+    const outofStock = await ProductSchemaModel.find({
+      quantity: { $lt: 5 },
+      userId: userId,
+    });
     return outofStock;
   } catch (error) {
-    throw new Error(messages.data_not_found);
+    throw new Error(messages.fetching_failed + error.message);
   }
 };
 
-export const notifyquantityAlert = async (quantityAlert) => {
+export const notifyQuantityAlert = async (userId, quantityAlert) => {
   try {
+    if (!userId) {
+      throw new Error("userId is required");
+    }
+
     const lowStockProducts = await ProductSchemaModel.find({
+      userId: userId,
       quantity: { $lt: quantityAlert },
     });
+
     return lowStockProducts;
   } catch (error) {
-    throw new Error(messages.data_not_found);
+    throw new Error(messages.fetching_failed + error.message);
+  }
+};
+
+export const updateAvgCost = async (productId, qty, price) => {
+  try {
+    const product = await ProductSchemaModel.findById(productId);
+    if (!product) {
+      throw new Error("Product not found");
+    }
+
+    if (product.avgCost === 0) {
+      product.avgCost = price;
+    } else {
+      const preValuation = product.quantity * product.avgCost;
+      const currentValuation = qty * price;
+
+      const totalValuation = preValuation + currentValuation;
+
+      const totalQuantity = product.quantity + qty;
+
+      product.avgCost = (totalValuation / totalQuantity).toFixed(12);
+    }
+    product.quantity += qty;
+    await product.save();
+
+    return product;
+  } catch (error) {
+    throw new Error("Error updating average cost");
   }
 };

@@ -5,9 +5,11 @@ import {
   deleteById,
   fetchById,
   lowStockProducts,
-  notifyquantityAlert
+  notifyQuantityAlert,
+  updateAvgCost,
 } from "../services/product.js";
 import { statusCodes, messages } from "../common/constant.js";
+import { startSession } from "mongoose";
 
 export const create = async (req, res) => {
   try {
@@ -97,7 +99,7 @@ export const deleteProduct = async (req, res) => {
 
 export const getLowStockCount = async (req, res) => {
   try {
-    const stockCount = await lowStockProducts();
+    const stockCount = await lowStockProducts(req);
     res.status(statusCodes.ok).json({
       success: true,
       message: messages.fetching_success,
@@ -114,8 +116,18 @@ export const getLowStockCount = async (req, res) => {
 
 export const alertLowStock = async (req, res) => {
   try {
-    const quantityAlert = req.query.quantityAlert || 50;
-    const lowStockProducts = await notifyquantityAlert(quantityAlert);
+    const userId = req.query.userId;
+    const quantityAlert = parseInt(req.query.quantityAlert || "50", 10);
+
+    if (!userId) {
+      return res.status(statusCodes.badRequest).json({
+        success: false,
+        message: "User ID is required",
+      });
+    }
+
+    const lowStockProducts = await notifyQuantityAlert(userId, quantityAlert);
+
     if (lowStockProducts.length > 0) {
       return res.status(statusCodes.ok).json({
         success: true,
@@ -132,6 +144,23 @@ export const alertLowStock = async (req, res) => {
     return res.status(statusCodes.internalServerError).json({
       success: false,
       message: messages.fetching_failed || "Internal server error",
+    });
+  }
+};
+
+export const handlePurchase = async (req, res) => {
+  try {
+    const { productId, qty, price } = req.body;
+
+    const updatedProduct = await updateAvgCost(productId, qty, price);
+    return res.status(statusCodes.ok).json({
+      message: "Purchase processed and average cost updated successfully!",
+      product: updatedProduct,
+    });
+  } catch (error) {
+    return res.status(statusCodes.internalServerError).json({
+      message: "Error processing purchase",
+      error: error.message,
     });
   }
 };
