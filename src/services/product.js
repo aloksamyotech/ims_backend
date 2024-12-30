@@ -222,3 +222,4 @@ export const updateAvgCost = async (productId, qty, price) => {
     throw new Error("Error updating average cost");
   }
 };
+

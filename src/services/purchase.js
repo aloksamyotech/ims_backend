@@ -247,14 +247,23 @@ export const handlePurchaseStatus = async (id, action) => {
 
 export const countPurchases = async (req) => {
   try {
-    const { userId } = req?.query;
+    const { userId, fromDate, toDate } = req?.query;
+
     if (!userId) {
       throw new Error("userId is required");
     }
-    const purchaseCount = await PurchaseSchemaModel.find({ 
+
+    const query = {
       isDeleted: false,
-      userId: userId 
-    });
+      userId: userId,
+    };
+    if (fromDate && toDate) {
+      const from = new Date(fromDate);
+      const to = new Date(toDate);
+      query.createdAt = { $gte: from, $lte: to }; 
+    }
+
+    const purchaseCount = await PurchaseSchemaModel.find(query);
     
     if (purchaseCount === 0) {
       return { message: messages.data_not_found};

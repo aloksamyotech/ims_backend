@@ -1,5 +1,5 @@
-import { save , fetch , deleteById , fetchById, handleOrderStatus , countOrders,
-   getTotalSalesForMonth , getTotalQuantityForMonth , getOrderProfit} from "../services/orders.js";
+import { save , fetch , deleteById , fetchById, handleOrderStatus , countOrders,getCategoryForMonth,getTotalQuantityForDateRange,
+   getTotalSalesForMonth ,getTotalSalesForDateRange, getTotalQuantityForMonth , getOrderProfit, getTotalSalesForEachCompany} from "../services/orders.js";
 import { fetchCustomerProductReport } from "../services/reports.js";
 import { statusCodes, messages } from "../common/constant.js";
 
@@ -123,9 +123,77 @@ export const getTotalSales = async (req, res) => {
   }
 };
 
+export const getSalesForDate = async (req, res) => {
+  try {
+    const { fromDate, toDate } = req.query;
+
+    if (!fromDate || !toDate) {
+      return res.status(statusCodes.badRequest).json({
+        success: false,
+        message: "Both fromDate and toDate are required.",
+      });
+    }
+
+    const salesData = await getTotalSalesForDateRange(req);
+
+    res.status(statusCodes.ok).json({
+      success: true,
+      data: salesData,
+    });
+  } catch (error) {
+    console.error("Error fetching total quantity for date range:", error);
+    res.status(statusCodes.internalServerError).json({
+      success: false,
+      message: messages.internalServerError,
+    });
+  }
+};
+
 export const getTotalQuantity = async (req, res) => {
   try {
     const salesData = await getTotalQuantityForMonth(req);
+    res.status(statusCodes.ok).json({
+      success: true,
+      data: salesData
+    });
+  } catch (error) {
+    res.status(statusCodes.internalServerError).json({
+      success: false,
+      message: messages.internalServerError
+    });
+  }
+};
+
+export const getQuantityForDate = async (req, res) => {
+  try {
+    const { fromDate, toDate } = req.query;
+
+    if (!fromDate || !toDate) {
+      return res.status(statusCodes.badRequest).json({
+        success: false,
+        message: "Both fromDate and toDate are required.",
+      });
+    }
+
+    const salesData = await getTotalQuantityForDateRange(req);
+
+    res.status(statusCodes.ok).json({
+      success: true,
+      data: salesData,
+    });
+  } catch (error) {
+    console.error("Error fetching total quantity for date range:", error);
+    res.status(statusCodes.internalServerError).json({
+      success: false,
+      message: messages.internalServerError,
+    });
+  }
+};
+
+
+export const getTotalCategory = async (req, res) => {
+  try {
+    const salesData = await getCategoryForMonth(req);
     res.status(statusCodes.ok).json({
       success: true,
       data: salesData
@@ -158,6 +226,27 @@ export const getOrderAmount = async (req,res) => {
     res.status(statusCodes.internalServerError).json({
       success: false,
       message: messages.internalServerError
+    });
+  }
+};
+
+export const getCompanyTotalSales = async (req, res) => {
+  try {
+    const totalSalesData = await getTotalSalesForEachCompany(req);
+    if (totalSalesData.length === 0) {
+      return res.status(statusCodes.notFound).json({ message: "No sales data found for any company." });
+    }
+
+    return res.status(statusCodes.ok).json({
+      success: true,
+      message: "Total sales for each company fetched successfully.",
+      data: totalSalesData,
+    });
+  } catch (error) {
+    return res.status(statusCodes.internalServerError).json({
+      success: false,
+      message: "An error occurred while fetching total sales data.",
+      error: error.message || error,
     });
   }
 };

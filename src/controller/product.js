@@ -6,7 +6,7 @@ import {
   fetchById,
   lowStockProducts,
   notifyQuantityAlert,
-  updateAvgCost,
+  updateAvgCost
 } from "../services/product.js";
 import { statusCodes, messages } from "../common/constant.js";
 import { startSession } from "mongoose";
@@ -164,3 +164,4 @@ export const handlePurchase = async (req, res) => {
     });
   }
 };
+

@@ -357,21 +357,32 @@ export const handleOrderStatus = async (id, action) => {
 
 export const countOrders = async (req) => {
   try {
-    const { userId } = req?.query;
+    const { userId, fromDate, toDate } = req?.query;
+
     if (!userId) {
       throw new Error("userId is required");
     }
-    const orderCount = await OrderSchemaModel.find({
+
+    const query = {
       isDeleted: false,
       userId: userId,
-    });
+    };
 
-    if (orderCount === 0) {
+    if (fromDate && toDate) {
+      const from = new Date(fromDate);
+      const to = new Date(toDate);
+      query.createdAt = { $gte: from, $lte: to }; 
+    }
+
+    const orderCount = await OrderSchemaModel.find(query);
+
+    if (orderCount.length === 0) {
       return { message: messages.data_not_found };
     }
+
     return orderCount.length;
   } catch (error) {
-    throw new Error(messages.data_not_found);
+    throw new Error(error.message || messages.data_not_found);
   }
 };
 
@@ -423,6 +434,52 @@ export const getTotalSalesForMonth = async (req) => {
   }
 };
 
+export const getTotalSalesForDateRange = async (req) => {
+try {
+  const { userId, fromDate, toDate } = req?.query;
+
+  if (!fromDate || !toDate) {
+    throw new Error("Both fromDate and toDate are required.");
+  }
+  const condition_obj = { 
+    isDeleted: false, 
+    order_status: "completed", 
+    createdAt: { 
+      $gte: new Date(fromDate), 
+      $lte: new Date(toDate) 
+    }
+  };
+
+  if (userId) {
+    condition_obj.userId = new mongoose.Types.ObjectId(userId);
+  }
+  const totalSales = await OrderSchemaModel.aggregate([
+    {
+      $match: condition_obj,
+    },
+    {
+      $unwind: "$products",
+    },
+    {
+      $group: {
+        _id: null,
+        total_sales_amount: { $sum: "$total" },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        total_sales_amount: 1,
+      },
+    },
+  ]);
+
+  return totalSales.length > 0 ? totalSales[0].total_sales_amount : 0;
+} catch (error) {
+  throw new Error(messages.data_not_found);
+}
+};
+
 export const getTotalQuantityForMonth = async (req) => {
   try {
     const { userId } = req?.query;
@@ -469,6 +526,91 @@ export const getTotalQuantityForMonth = async (req) => {
   }
 };
 
+export const getTotalQuantityForDateRange = async (req) => {
+  try {
+    const { userId, fromDate, toDate } = req?.query;
+
+    if (!fromDate || !toDate) {
+      throw new Error("Both fromDate and toDate are required.");
+    }
+
+    const condition_obj = { 
+      isDeleted: false, 
+      order_status: "completed", 
+      createdAt: { 
+        $gte: new Date(fromDate), 
+        $lte: new Date(toDate) 
+      }
+    };
+
+    if (userId) {
+      condition_obj.userId = new mongoose.Types.ObjectId(userId);
+    }
+
+    const totalQuantity = await OrderSchemaModel.aggregate([
+      {
+        $match: condition_obj,
+      },
+      {
+        $unwind: "$products",
+      },
+      {
+        $group: {
+          _id: null,
+          totalQuantitySold: { $sum: "$products.quantity" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          totalQuantitySold: 1,
+        },
+      },
+    ]);
+
+    return totalQuantity.length > 0 ? totalQuantity[0].totalQuantitySold : 0;
+  } catch (error) {
+    throw new Error(messages.data_not_found);
+  }
+};
+
+export const getCategoryForMonth = async (req) => {
+  try {
+    const { userId } = req?.query;
+
+    const condition_obj = { isDeleted: false, order_status: "completed" };
+
+    if (userId) {
+      condition_obj.userId = new mongoose.Types.ObjectId(userId); 
+    }
+
+    const topCategories = await OrderSchemaModel.aggregate([
+      { $match: condition_obj }, 
+      { $unwind: "$products" },
+      {
+        $group: {
+          _id: "$products.categoryName", 
+          totalQuantity: { $sum: "$products.quantity" }, 
+        },
+      },
+      { $sort: { totalQuantity: -1 } },
+      { $limit: 3 }, 
+      {
+        $project: {
+          _id: 0,
+          category: "$_id", 
+          totalQuantity: 1,
+        },
+      },
+    ]);
+
+    return topCategories; 
+  } catch (error) {
+    throw new Error(messages.data_not_found); 
+  }
+};
+
+
 const calculateProfit = (order) => {
   try {
     const totalOrder = order.total;
@@ -501,3 +643,54 @@ export const getOrderProfit = async (id) => {
     throw new Error(messages.data_not_found);
   }
 };
+
+
+export const getTotalSalesForEachCompany = async (req) => {
+  try {
+    const { userId } = req?.query;
+    const condition_obj = { isDeleted: false };
+
+    if (userId) {
+      condition_obj.userId = new mongoose.Types.ObjectId(userId);
+    }
+
+    const totalSalesPerCompany = await OrderSchemaModel.aggregate([
+      { $match: condition_obj }, 
+      {
+        $group: {
+          _id: "$userId",
+          total_sales_amount: { $sum: "$total" }, 
+        },
+      },
+      {
+        $lookup: {
+          from: tableNames.users, 
+          localField: "_id",
+          foreignField: "_id",
+          as: "companyInfo",
+        },
+      },
+      {
+        $unwind: {
+          path: "$companyInfo",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          companyId: "$_id", 
+          companyName: "$companyInfo.name", 
+          total_sales_amount: 1,
+        },
+      },
+      {
+        $sort: { total_sales_amount: -1 }, 
+      },
+    ]);
+
+    return totalSalesPerCompany;
+  } catch (error) {
+    throw new Error(messages.data_not_found);
+  }
+};
+
