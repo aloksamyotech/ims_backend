@@ -135,7 +135,7 @@ export const save = async (req) => {
         categoryName: dbProduct.categoryName,
         quantity: product.quantity,
         price: dbProduct.sellingPrice,
-        buyingPrice: dbProduct.buyingPrice,
+        buyingPrice: dbProduct.avgCost,
       });
     }
 
@@ -371,7 +371,7 @@ export const countOrders = async (req) => {
     if (fromDate && toDate) {
       const from = new Date(fromDate);
       const to = new Date(toDate);
-      query.createdAt = { $gte: from, $lte: to }; 
+      query.createdAt = { $gte: from, $lte: to };
     }
 
     const orderCount = await OrderSchemaModel.find(query);
@@ -388,11 +388,18 @@ export const countOrders = async (req) => {
 
 export const getTotalSalesForMonth = async (req) => {
   try {
-    const { userId } = req?.query;
+    const { userId, year } = req?.query;
     const condition_obj = { isDeleted: false };
 
     if (userId) {
       condition_obj.userId = new mongoose.Types.ObjectId(userId);
+    }
+
+    if (year) {
+      condition_obj["createdAt"] = {
+        $gte: new Date(`${year}-01-01`),
+        $lt: new Date(`${parseInt(year) + 1}-01-01`),
+      };
     }
 
     const totalAmount = await OrderSchemaModel.aggregate([
@@ -430,66 +437,72 @@ export const getTotalSalesForMonth = async (req) => {
 
     return formattedData;
   } catch (error) {
+    console.error("Error fetching total sales for the month:", error);
     throw new Error(messages.data_not_found);
   }
 };
 
 export const getTotalSalesForDateRange = async (req) => {
-try {
-  const { userId, fromDate, toDate } = req?.query;
+  try {
+    const { userId, fromDate, toDate } = req?.query;
 
-  if (!fromDate || !toDate) {
-    throw new Error("Both fromDate and toDate are required.");
-  }
-  const condition_obj = { 
-    isDeleted: false, 
-    order_status: "completed", 
-    createdAt: { 
-      $gte: new Date(fromDate), 
-      $lte: new Date(toDate) 
+    if (!fromDate || !toDate) {
+      throw new Error("Both fromDate and toDate are required.");
     }
-  };
+    const condition_obj = {
+      isDeleted: false,
+      order_status: "completed",
+      createdAt: {
+        $gte: new Date(fromDate),
+        $lte: new Date(toDate),
+      },
+    };
 
-  if (userId) {
-    condition_obj.userId = new mongoose.Types.ObjectId(userId);
+    if (userId) {
+      condition_obj.userId = new mongoose.Types.ObjectId(userId);
+    }
+    const totalSales = await OrderSchemaModel.aggregate([
+      {
+        $match: condition_obj,
+      },
+      {
+        $unwind: "$products",
+      },
+      {
+        $group: {
+          _id: null,
+          total_sales_amount: { $sum: "$total" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          total_sales_amount: 1,
+        },
+      },
+    ]);
+
+    return totalSales.length > 0 ? totalSales[0].total_sales_amount : 0;
+  } catch (error) {
+    throw new Error(messages.data_not_found);
   }
-  const totalSales = await OrderSchemaModel.aggregate([
-    {
-      $match: condition_obj,
-    },
-    {
-      $unwind: "$products",
-    },
-    {
-      $group: {
-        _id: null,
-        total_sales_amount: { $sum: "$total" },
-      },
-    },
-    {
-      $project: {
-        _id: 0,
-        total_sales_amount: 1,
-      },
-    },
-  ]);
-
-  return totalSales.length > 0 ? totalSales[0].total_sales_amount : 0;
-} catch (error) {
-  throw new Error(messages.data_not_found);
-}
 };
 
 export const getTotalQuantityForMonth = async (req) => {
   try {
-    const { userId } = req?.query;
-
-    const condition_obj = { isDeleted: false, order_status: "completed" };
+    const { userId, year } = req?.query;
+    const condition_obj = { isDeleted: false };
 
     if (userId) {
       condition_obj.userId = new mongoose.Types.ObjectId(userId);
     }
 
+    if (year) {
+      condition_obj["createdAt"] = {
+        $gte: new Date(`${year}-01-01`),
+        $lt: new Date(`${parseInt(year) + 1}-01-01`),
+      };
+    }
     const totalQuantity = await OrderSchemaModel.aggregate([
       {
         $match: condition_obj,
@@ -506,21 +519,29 @@ export const getTotalQuantityForMonth = async (req) => {
       {
         $sort: { _id: 1 },
       },
-      {
-        $project: {
-          _id: 0,
-          month: "$_id",
-          totalQuantitySold: 1,
-        },
-      },
     ]);
 
-    const monthlyQuantities = new Array(12).fill(0);
-    totalQuantity.forEach((data) => {
-      const monthIndex = data.month - 1;
-      monthlyQuantities[monthIndex] = data.totalQuantitySold;
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    const formattedData = months.map((month, index) => {
+      const monthData = totalQuantity.find((data) => data._id === index + 1);
+      return monthData ? monthData.totalQuantitySold : 0;
     });
-    return monthlyQuantities;
+
+    return formattedData;
   } catch (error) {
     throw new Error(messages.data_not_found);
   }
@@ -534,13 +555,13 @@ export const getTotalQuantityForDateRange = async (req) => {
       throw new Error("Both fromDate and toDate are required.");
     }
 
-    const condition_obj = { 
-      isDeleted: false, 
-      order_status: "completed", 
-      createdAt: { 
-        $gte: new Date(fromDate), 
-        $lte: new Date(toDate) 
-      }
+    const condition_obj = {
+      isDeleted: false,
+      order_status: "completed",
+      createdAt: {
+        $gte: new Date(fromDate),
+        $lte: new Date(toDate),
+      },
     };
 
     if (userId) {
@@ -576,74 +597,101 @@ export const getTotalQuantityForDateRange = async (req) => {
 
 export const getCategoryForMonth = async (req) => {
   try {
-    const { userId } = req?.query;
+    const { userId, fromDate, toDate } = req?.query;
 
     const condition_obj = { isDeleted: false, order_status: "completed" };
 
     if (userId) {
-      condition_obj.userId = new mongoose.Types.ObjectId(userId); 
+      condition_obj.userId = new mongoose.Types.ObjectId(userId);
+    }
+
+    if (fromDate && toDate) {
+      condition_obj.createdAt = {
+        $gte: new Date(fromDate),
+        $lte: new Date(toDate),
+      };
     }
 
     const topCategories = await OrderSchemaModel.aggregate([
-      { $match: condition_obj }, 
+      { $match: condition_obj },
       { $unwind: "$products" },
       {
         $group: {
-          _id: "$products.categoryName", 
-          totalQuantity: { $sum: "$products.quantity" }, 
+          _id: "$products.categoryName",
+          totalQuantity: { $sum: "$products.quantity" },
         },
       },
       { $sort: { totalQuantity: -1 } },
-      { $limit: 3 }, 
+      { $limit: 3 },
       {
         $project: {
           _id: 0,
-          category: "$_id", 
+          category: "$_id",
           totalQuantity: 1,
         },
       },
     ]);
 
-    return topCategories; 
+    return topCategories;
   } catch (error) {
-    throw new Error(messages.data_not_found); 
+    throw new Error(messages.data_not_found);
   }
 };
 
+const calculateProfitPerProduct = (order) => {
+  let productData = {};
 
-const calculateProfit = (order) => {
+  order.products.forEach((product) => {
+    const costPrice = product.buyingPrice;
+    const sellingPrice = product.price;
+    const quantity = product.quantity;
+
+    const totalPurchaseAmount = costPrice * quantity;
+    const profit = sellingPrice * quantity - totalPurchaseAmount;
+
+    if (productData[product.productId]) {
+      productData[product.productId].soldQuantity += quantity;
+      productData[product.productId].soldAmount += sellingPrice * quantity;
+      productData[product.productId].totalProfitOrLoss += profit || 0;
+    } else {
+      productData[product.productId] = {
+        productName: product.productName,
+        soldQuantity: quantity,
+        soldAmount: sellingPrice * quantity,
+        totalProfitOrLoss: profit || 0,
+      };
+    }
+  });
+
+  return productData;
+};
+
+export const getProfitAndSalesForAllProducts = async (userId) => {
   try {
-    const totalOrder = order.total;
-    let totalPurchase = 0;
+    const orders = await OrderSchemaModel.find({ userId: userId });
+    let allProductData = {};
 
-    order.products.forEach((product) => {
-      const costPrice = product.buyingPrice;
-      const quantity = product.quantity;
-
-      const totalPurchaseAmount = costPrice * quantity;
-      totalPurchase += totalPurchaseAmount;
+    orders.forEach((order) => {
+      const profitData = calculateProfitPerProduct(order);
+      for (const productId in profitData) {
+        if (allProductData[productId]) {
+          allProductData[productId].soldQuantity +=
+            profitData[productId].soldQuantity;
+          allProductData[productId].soldAmount +=
+            profitData[productId].soldAmount;
+          allProductData[productId].totalProfitOrLoss +=
+            profitData[productId].totalProfitOrLoss;
+        } else {
+          allProductData[productId] = profitData[productId];
+        }
+      }
     });
 
-    const orderProfit = totalOrder - totalPurchase;
-    return orderProfit;
+    return allProductData;
   } catch (error) {
     throw new Error(messages.data_not_found);
   }
 };
-
-export const getOrderProfit = async (id) => {
-  try {
-    const order = await OrderSchemaModel.findById(id);
-    if (!order) {
-      return { message: messages.data_not_found };
-    }
-    const profit = calculateProfit(order);
-    return profit;
-  } catch (error) {
-    throw new Error(messages.data_not_found);
-  }
-};
-
 
 export const getTotalSalesForEachCompany = async (req) => {
   try {
@@ -655,16 +703,16 @@ export const getTotalSalesForEachCompany = async (req) => {
     }
 
     const totalSalesPerCompany = await OrderSchemaModel.aggregate([
-      { $match: condition_obj }, 
+      { $match: condition_obj },
       {
         $group: {
           _id: "$userId",
-          total_sales_amount: { $sum: "$total" }, 
+          total_sales_amount: { $sum: "$total" },
         },
       },
       {
         $lookup: {
-          from: tableNames.users, 
+          from: tableNames.users,
           localField: "_id",
           foreignField: "_id",
           as: "companyInfo",
@@ -678,13 +726,13 @@ export const getTotalSalesForEachCompany = async (req) => {
       },
       {
         $project: {
-          companyId: "$_id", 
-          companyName: "$companyInfo.name", 
+          companyId: "$_id",
+          companyName: "$companyInfo.name",
           total_sales_amount: 1,
         },
       },
       {
-        $sort: { total_sales_amount: -1 }, 
+        $sort: { total_sales_amount: -1 },
       },
     ]);
 
@@ -693,4 +741,3 @@ export const getTotalSalesForEachCompany = async (req) => {
     throw new Error(messages.data_not_found);
   }
 };
-

@@ -119,7 +119,7 @@ OrderSchema.pre("save", async function (next) {
       this.productName = product?.productnm;
       this.categoryName = product?.categoryName;
       this.price = product?.sellingPrice;
-      this.buyingPrice = product?.buyingPrice;
+      this.buyingPrice = product?.avgCost;
     }
 
     if (this.customerId) {

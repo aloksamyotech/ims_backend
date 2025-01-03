@@ -1,5 +1,5 @@
 import { save , fetch , deleteById , fetchById, handleOrderStatus , countOrders,getCategoryForMonth,getTotalQuantityForDateRange,
-   getTotalSalesForMonth ,getTotalSalesForDateRange, getTotalQuantityForMonth , getOrderProfit, getTotalSalesForEachCompany} from "../services/orders.js";
+   getTotalSalesForMonth ,getTotalSalesForDateRange, getTotalQuantityForMonth , getProfitAndSalesForAllProducts, getTotalSalesForEachCompany} from "../services/orders.js";
 import { fetchCustomerProductReport } from "../services/reports.js";
 import { statusCodes, messages } from "../common/constant.js";
 
@@ -193,6 +193,15 @@ export const getQuantityForDate = async (req, res) => {
 
 export const getTotalCategory = async (req, res) => {
   try {
+    const { fromDate, toDate } = req.query;
+
+    if (!fromDate || !toDate) {
+      return res.status(statusCodes.badRequest).json({
+        success: false,
+        message: "Both fromDate and toDate are required.",
+      });
+    }
+    
     const salesData = await getCategoryForMonth(req);
     res.status(statusCodes.ok).json({
       success: true,
@@ -205,24 +214,22 @@ export const getTotalCategory = async (req, res) => {
     });
   }
 };
+export const getOrderAmount = async (req, res) => {
+  try {
+    const userId = req?.query?.userId; 
 
-export const getOrderAmount = async (req,res) => {
-  try{
-    const { id } = req.params; 
-    if (!id) {
+    if (!userId) {
       return res.status(statusCodes.badRequest).json({
         success: false,
-        message: "Order ID is required.",
+        message: messages.required
       });
     }
-    const profit = await getOrderProfit(id);
-    console.log(profit);
+    const profit = await getProfitAndSalesForAllProducts(userId);
     res.status(statusCodes.ok).json({
       success: true,
       data: profit
     });
-  }
-  catch(error){
+  } catch (error) {
     res.status(statusCodes.internalServerError).json({
       success: false,
       message: messages.internalServerError

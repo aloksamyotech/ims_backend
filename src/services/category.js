@@ -27,6 +27,41 @@ export const save = async (req) => {
   }
 };
 
+export const bulkSave = async (req) => {
+  const { categories, userId } = req?.body;
+
+  try {
+    if (!categories || categories.length === 0) {
+      return {  message: "No categories provided." };
+    }
+
+    const categoriesWithUserId = categories.map(category => ({
+      ...category,
+      userId, 
+    }));
+
+    const existingCategories = await CategorySchemaModel.find({
+      catnm: { $in: categoriesWithUserId.map(c => c.catnm) },
+      userId,
+      isDeleted: false
+    }).select('catnm');
+
+    const existingCategoryNames = existingCategories.map(c => c.catnm);
+    const newCategories = categoriesWithUserId.filter(c => !existingCategoryNames.includes(c.catnm));
+
+    if (newCategories.length === 0) {
+      return { message: "All categories already exist." };
+    }
+
+    const savedCategories = await CategorySchemaModel.insertMany(newCategories);
+
+    return savedCategories;
+  } catch (error) {
+    return {  message: 'An error occurred during bulk upload.' };
+  }
+};
+
+
 export const fetch = async (req) => {
   try {
     const { userId } = req?.query; 

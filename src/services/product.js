@@ -51,6 +51,52 @@ export const save = async (req) => {
   }
 };
 
+export const bulkUploadProducts = async (req) => {
+  const { productsData } = req?.body;
+
+  try {
+ 
+    const savedProducts = [];
+
+    for (const product of productsData) {
+      const { userId,productnm, buyingPrice, sellingPrice, quantity, quantityAlert, tax, margin, notes, categoryId, categoryName, avgCost } = product;
+
+      let category;
+
+      if (categoryId) {
+        category = await CategorySchemaModel.findById(categoryId);
+      }
+
+      if (!category && categoryName) {
+        category = await CategorySchemaModel.findOne({ catnm: categoryName });
+      }
+
+      if (!category) {
+        category = new CategorySchemaModel({
+          catnm: categoryName,
+          userId,
+        });
+        await category.save();
+      }
+
+      const productWithUserId = {
+        ...product,
+        userId, 
+        categoryId: category._id,
+        categoryName: category.catnm,
+      };
+
+      const productModel = new ProductSchemaModel(productWithUserId);
+      const savedProduct = await productModel.save();
+      savedProducts.push(savedProduct);
+    }
+
+    return savedProducts;
+  } catch (error) {
+    throw new Error(messages.data_update_error , error.message);
+  }
+};
+
 export const fetch = async (req) => {
   try {
     const { userId } = req?.query;

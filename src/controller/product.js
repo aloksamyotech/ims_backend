@@ -6,10 +6,9 @@ import {
   fetchById,
   lowStockProducts,
   notifyQuantityAlert,
-  updateAvgCost
+  updateAvgCost, bulkUploadProducts
 } from "../services/product.js";
 import { statusCodes, messages } from "../common/constant.js";
-import { startSession } from "mongoose";
 
 export const create = async (req, res) => {
   try {
@@ -19,6 +18,15 @@ export const create = async (req, res) => {
     res.status(statusCodes.internalServerError).json({ error: error });
   }
 };
+
+export const bulkupload = async (req,res) => {
+    try {
+      const result = await bulkUploadProducts(req);
+      res.status(statusCodes.ok).json(result);
+    } catch (error) {
+      res.status(statusCodes.internalServerError).json({ error : error });
+    }
+  };
 
 export const fetch_product = async (req, res) => {
   try {

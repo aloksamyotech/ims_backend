@@ -1,4 +1,4 @@
-import { save , fetch , update ,deleteById } from "../services/category.js";
+import { save , fetch , update ,deleteById ,bulkSave} from "../services/category.js";
 import { statusCodes, messages } from "../common/constant.js";
 
 export const create = async (req, res) => {
@@ -11,6 +11,16 @@ export const create = async (req, res) => {
     });
   }
 };
+
+export const bulkupload = async (req,res) => {
+    try {
+      const result = await bulkSave(req);
+      res.status(statusCodes.ok).json(result);
+    } catch (error) {
+      console.error('Error in bulk upload route:', error);
+      res.status(statusCodes.internalServerError).json({ message: 'An error occurred during bulk upload.' });
+    }
+  };
 
 export const fetch_category = async (req, res) => {
   try {
