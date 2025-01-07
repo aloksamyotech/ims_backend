@@ -8,7 +8,7 @@ const defaultAdmin = {
   name: 'Admin',   
   phone: '9876376321',
   email: 'admin@gmail.com', 
-  password: 'admin123', 
+  password: 'U2FsdGVkX190xH6IIO9pqFAcuT4mbAisjrCdJkOtWWM=', 
   role : 'admin'
 };
 
