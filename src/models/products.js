@@ -42,6 +42,7 @@ const ProductSchema = new mongoose.Schema(
     quantityAlert: {
        type: Number,
        required: true,
+       default : 30,
     },
     product_no: {
       type: String,

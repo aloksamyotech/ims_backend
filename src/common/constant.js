@@ -29,6 +29,8 @@ export const tableNames = {
   purchase: "purchase",
   admin: "admin",
   subscription: "subscription",
+  employee: "employee",
+  empPermissions : "empPermissions",
 };
 
 export const messages = {

@@ -42,18 +42,6 @@ const CustomerSchema = new mongoose.Schema(
       type: Boolean,
       default: true, 
     },
-    // accountHolder: {
-    //   type: String,
-    //   trim: true,
-    // },
-    // accountNumber: {
-    //   type: Number,
-    //   trim: true,
-    // },
-    // bankName: {
-    //   type: String,
-    //   trim: true,
-    // },
     isActive: {
       type: Boolean,
       default: true,

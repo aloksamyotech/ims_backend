@@ -13,6 +13,8 @@ import orderRouter from "./src/routes/orders.js";
 import purchaseRouter from "./src/routes/purchase.js";
 import adminRouter from "./src/routes/master.js";
 import subscriptionRouter from "./src/routes/subscription.js";
+import employeeRouter from './src/routes/employee.js';
+import empPermissionRouter from "./src/routes/empPermissions.js";
 import multer from "multer";
 
 const app = express();
@@ -33,6 +35,8 @@ app.use("/order", orderRouter);
 app.use("/purchase", purchaseRouter);
 app.use("/admin", adminRouter);
 app.use("/subscription", subscriptionRouter);
+app.use("/employee", employeeRouter);
+app.use("/permissions",empPermissionRouter);
 
 connectDb();
 const port = process.env.PORT;

@@ -74,6 +74,7 @@ export const login = async (email, password) => {
 
     return { success: true, jwtToken, user: payload };
   } catch (error) {
+    console.log(error)
     return { success: false, message: messages.server_error };
   }
 };
