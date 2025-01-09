@@ -125,7 +125,7 @@ export const getTotalSales = async (req, res) => {
 
 export const getSalesForDate = async (req, res) => {
   try {
-    const { fromDate, toDate } = req.query;
+    const { fromDate, toDate } = req?.query;
 
     if (!fromDate || !toDate) {
       return res.status(statusCodes.badRequest).json({
@@ -166,7 +166,7 @@ export const getTotalQuantity = async (req, res) => {
 
 export const getQuantityForDate = async (req, res) => {
   try {
-    const { fromDate, toDate } = req.query;
+    const { fromDate, toDate } = req?.query;
 
     if (!fromDate || !toDate) {
       return res.status(statusCodes.badRequest).json({
@@ -193,7 +193,7 @@ export const getQuantityForDate = async (req, res) => {
 
 export const getTotalCategory = async (req, res) => {
   try {
-    const { fromDate, toDate } = req.query;
+    const { fromDate, toDate } = req?.query;
 
     if (!fromDate || !toDate) {
       return res.status(statusCodes.badRequest).json({

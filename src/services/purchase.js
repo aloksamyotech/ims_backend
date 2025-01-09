@@ -265,7 +265,7 @@ export const countPurchases = async (req) => {
 
     const purchaseCount = await PurchaseSchemaModel.find(query);
     
-    if (purchaseCount === 0) {
+    if (!purchaseCount || purchaseCount === 0) {
       return { message: messages.data_not_found};
     }
 

@@ -124,7 +124,7 @@ export const getLowStockCount = async (req, res) => {
 
 export const alertLowStock = async (req, res) => {
   try {
-    const userId = req.query.userId;
+    const userId = req?.query?.userId;
     const quantityAlert = parseInt(req.query.quantityAlert || "50", 10);
 
     if (!userId) {
@@ -158,7 +158,7 @@ export const alertLowStock = async (req, res) => {
 
 export const handlePurchase = async (req, res) => {
   try {
-    const { productId, qty, price } = req.body;
+    const { productId, qty, price } = req?.body;
 
     const updatedProduct = await updateAvgCost(productId, qty, price);
     return res.status(statusCodes.ok).json({

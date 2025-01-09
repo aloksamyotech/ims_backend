@@ -87,11 +87,14 @@ export const countSupplier = async (req) => {
     if (!userId) {
       throw new Error("userId is required");
     }
+    
+    const condition_obj = { isDeleted: false }; 
 
-    const supplierCount = await SupplierSchemaModel.find({ 
-      isDeleted: false,
-      userId: userId 
-    });
+    if (userId) {
+      condition_obj.userId = userId;
+    }
+
+    const supplierCount = await SupplierSchemaModel.find(condition_obj);
 
     if (supplierCount === 0) {
       return { message: messages.data_not_found};

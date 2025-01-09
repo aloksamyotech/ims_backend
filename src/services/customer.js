@@ -93,11 +93,13 @@ export const countCustomer = async (req) => {
     if (!userId) {
       throw new Error("userId is required");
     }
+    const condition_obj = { isDeleted: false }; 
 
-    const customerCount = await CustomerSchemaModel.find({ 
-      isDeleted: false,
-      userId: userId 
-    });
+    if (userId) {
+      condition_obj.userId = userId;
+    }
+
+    const customerCount = await CustomerSchemaModel.find(condition_obj);
 
     if (customerCount === 0) {
       return { message: messages.data_not_found};

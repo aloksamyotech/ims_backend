@@ -80,8 +80,9 @@ export const updateUser = async (req, res) => {
     }
     return res.status(statusCodes.ok).json(updatedUser);
   } catch (error) {
+    console.log(error);
     return res.status(statusCodes.internalServerError).json({
-      message: messages.fetching_failed,
+      message: messages.data_update_error,
     });
   }
 };

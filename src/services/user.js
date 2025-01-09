@@ -1,5 +1,6 @@
 import { encryptText, decryptText } from "../common/helper.js";
 import UserSchemaModel from "../models/user.js";
+import AdminSchemaModel from "../models/master.js";
 import jwt from "jsonwebtoken";
 import { messages } from "../common/constant.js";
 
@@ -48,20 +49,25 @@ export const fetchById = async (id) => {
 
 export const login = async (email, password) => {
   try {
-    const user = await UserSchemaModel.findOne({ email });
+    let user = await UserSchemaModel.findOne({ email });
+
+    if (!user) {
+      user = await AdminSchemaModel.findOne({ email });
+    }
 
     if (!user) {
       return { success: false, message: messages.user_not_found };
     }
 
-    if (!user.isActive) {
-      return { success: false, message: messages.account_inactive };
-    }
+    // if (!user.isActive) {
+    //   return { success: false, message: messages.account_inactive };
+    // }
 
     const decryptedPassword = decryptText(user.password);
     if (password !== decryptedPassword) {
       return { success: false, message: messages.invalid_credentials };
     }
+
     const payload = {
       _id: user._id,
       name: user.name,
@@ -74,10 +80,11 @@ export const login = async (email, password) => {
 
     return { success: true, jwtToken, user: payload };
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return { success: false, message: messages.server_error };
   }
 };
+
 
 export const update = async (id, updateData) => {
   try {
@@ -157,7 +164,7 @@ export const updateStatus = async (id, isActive) => {
 export const countCompany = async (req) => {
   try {
     const companyCount = await UserSchemaModel.countDocuments({ isDeleted: false , role: 'user' });
-    if (companyCount === 0) {
+    if (!companyCount || companyCount === 0) {
       return 0;
     }
     return companyCount;

@@ -1,10 +1,11 @@
+import mongoose from "mongoose";
 import { messages } from "../common/constant.js";
 import CategorySchemaModel from "../models/category.js";
 import UserSchemaModel from "../models/user.js";
 
 export const save = async (req) => {
-  const { catnm, desc, userId } = req.body; 
-
+  let { catnm, desc, userId } = req.body; 
+  userId = mongoose.Types.ObjectId(userId)
   try {
     const existingCategory = await CategorySchemaModel.findOne({
       catnm,
