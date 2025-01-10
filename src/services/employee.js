@@ -18,11 +18,11 @@ export const save = async (req) => {
     if (!user) {
       throw new Error(messages.data_not_found);
     }
-    // const encryptedPassword = encryptText(password);
+    const encryptedPassword = encryptText(password);
     const employeeModel = new EmployeeSchemaModel({
       name,
       email,
-      password ,
+      password : encryptedPassword,
       phone,
       address,
       userId

@@ -377,7 +377,7 @@ export const countOrders = async (req) => {
     const orderCount = await OrderSchemaModel.find(query);
 
     if (!orderCount || orderCount.length === 0) {
-      return { message: messages.data_not_found };
+      return 0;
     }
 
     return orderCount.length;

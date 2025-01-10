@@ -1,6 +1,8 @@
 import { encryptText, decryptText } from "../common/helper.js";
 import UserSchemaModel from "../models/user.js";
 import AdminSchemaModel from "../models/master.js";
+import EmployeeSchemaModel from "../models/employee.js";
+import EmpPermissionSchemaModel from "../models/empPermissions.js";
 import jwt from "jsonwebtoken";
 import { messages } from "../common/constant.js";
 
@@ -47,44 +49,107 @@ export const fetchById = async (id) => {
   }
 };
 
+// export const login = async (email, password) => {
+//   try {
+//     let user = await UserSchemaModel.findOne({ email });
+
+//     if (!user) {
+//       user = await AdminSchemaModel.findOne({ email });
+//     }
+
+//     if (!user) {
+//       return { success: false, message: messages.user_not_found };
+//     }
+
+//     // if (!user.isActive) {
+//     //   return { success: false, message: messages.account_inactive };
+//     // }
+
+//     const decryptedPassword = decryptText(user.password);
+//     if (password !== decryptedPassword) {
+//       return { success: false, message: messages.invalid_credentials };
+//     }
+
+//     const payload = {
+//       _id: user._id,
+//       name: user.name,
+//       phone: user.phone,
+//       email: user.email,
+//       role: user.role,
+//     };
+
+//     const jwtToken = jwt.sign(payload, process.env.SECRET);
+
+//     return { success: true, jwtToken, user: payload };
+//   } catch (error) {
+//     console.log(error);
+//     return { success: false, message: messages.server_error };
+//   }
+// };
+
 export const login = async (email, password) => {
   try {
-    let user = await UserSchemaModel.findOne({ email });
-
-    if (!user) {
-      user = await AdminSchemaModel.findOne({ email });
-    }
+    let user =
+      (await UserSchemaModel.findOne({ email })) ||
+      (await AdminSchemaModel.findOne({ email })) ||
+      (await EmployeeSchemaModel.findOne({ email }));
 
     if (!user) {
       return { success: false, message: messages.user_not_found };
     }
 
-    // if (!user.isActive) {
-    //   return { success: false, message: messages.account_inactive };
-    // }
+    if (user instanceof AdminSchemaModel) {
+      user.role = "admin";
+    } else if (user instanceof EmployeeSchemaModel) {
+      user.role = "employee";
+    } else if (user instanceof UserSchemaModel) {
+      user.role = "user";
+    }
+
+    if (user.role === "user") {
+      if (!user.isActive) {
+        return { success: false, message: messages.account_inactive };
+      }
+    }
 
     const decryptedPassword = decryptText(user.password);
     if (password !== decryptedPassword) {
       return { success: false, message: messages.invalid_credentials };
     }
 
-    const payload = {
-      _id: user._id,
-      name: user.name,
-      phone: user.phone,
-      email: user.email,
-      role: user.role,
-    };
+    let payload;
+
+    if (user.role === "employee") {
+      const permissionsData = await EmpPermissionSchemaModel.findOne({
+        empId: user._id,
+      });
+      const permissions = permissionsData?.permissions || [];
+      payload = {
+        _id: user._id,
+        name: user.name,
+        phone: user.phone,
+        email: user.email,
+        role: user.role,
+        permissions,
+      };
+    } else if (user.role === "admin" || "user") {
+      payload = {
+        _id: user._id,
+        name: user.name,
+        phone: user.phone,
+        email: user.email,
+        role: user.role,
+      };
+    }
 
     const jwtToken = jwt.sign(payload, process.env.SECRET);
 
     return { success: true, jwtToken, user: payload };
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return { success: false, message: messages.server_error };
   }
 };
-
 
 export const update = async (id, updateData) => {
   try {
@@ -163,7 +228,10 @@ export const updateStatus = async (id, isActive) => {
 
 export const countCompany = async (req) => {
   try {
-    const companyCount = await UserSchemaModel.countDocuments({ isDeleted: false , role: 'user' });
+    const companyCount = await UserSchemaModel.countDocuments({
+      isDeleted: false,
+      role: "user",
+    });
     if (!companyCount || companyCount === 0) {
       return 0;
     }
