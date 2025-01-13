@@ -59,4 +59,4 @@ export const messages = {
   already_exist: 'Already exist',
 };
 
-export const image_url = {  url :"http://localhost:4200/" , };
+export const image_url = {  url :"https://ims.samyotech.in/api/" , };

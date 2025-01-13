@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 app.use(express.json());
-app.use('/api/uploads', express.static( 'uploads'));
+app.use("/api/uploads", express.static( 'uploads'));
 app.use("/api/category", categoryRouter);
 app.use("/api/unit", unitRouter);
 app.use("/api/user", userRouter);

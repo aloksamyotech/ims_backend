@@ -49,44 +49,6 @@ export const fetchById = async (id) => {
   }
 };
 
-// export const login = async (email, password) => {
-//   try {
-//     let user = await UserSchemaModel.findOne({ email });
-
-//     if (!user) {
-//       user = await AdminSchemaModel.findOne({ email });
-//     }
-
-//     if (!user) {
-//       return { success: false, message: messages.user_not_found };
-//     }
-
-//     // if (!user.isActive) {
-//     //   return { success: false, message: messages.account_inactive };
-//     // }
-
-//     const decryptedPassword = decryptText(user.password);
-//     if (password !== decryptedPassword) {
-//       return { success: false, message: messages.invalid_credentials };
-//     }
-
-//     const payload = {
-//       _id: user._id,
-//       name: user.name,
-//       phone: user.phone,
-//       email: user.email,
-//       role: user.role,
-//     };
-
-//     const jwtToken = jwt.sign(payload, process.env.SECRET);
-
-//     return { success: true, jwtToken, user: payload };
-//   } catch (error) {
-//     console.log(error);
-//     return { success: false, message: messages.server_error };
-//   }
-// };
-
 export const login = async (email, password) => {
   try {
     let user =
@@ -126,6 +88,7 @@ export const login = async (email, password) => {
       const permissions = permissionsData?.permissions || [];
       payload = {
         _id: user._id,
+        userId: user.userId,
         name: user.name,
         phone: user.phone,
         email: user.email,
@@ -146,7 +109,6 @@ export const login = async (email, password) => {
 
     return { success: true, jwtToken, user: payload };
   } catch (error) {
-    console.error(error);
     return { success: false, message: messages.server_error };
   }
 };

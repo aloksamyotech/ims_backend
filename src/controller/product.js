@@ -6,7 +6,8 @@ import {
   fetchById,
   lowStockProducts,
   notifyQuantityAlert,
-  updateAvgCost, bulkUploadProducts
+  updateAvgCost,
+  bulkUploadProducts,
 } from "../services/product.js";
 import { statusCodes, messages } from "../common/constant.js";
 
@@ -19,14 +20,14 @@ export const create = async (req, res) => {
   }
 };
 
-export const bulkupload = async (req,res) => {
-    try {
-      const result = await bulkUploadProducts(req);
-      res.status(statusCodes.ok).json(result);
-    } catch (error) {
-      res.status(statusCodes.internalServerError).json({ error : error });
-    }
-  };
+export const bulkupload = async (req, res) => {
+  try {
+    const result = await bulkUploadProducts(req);
+    res.status(statusCodes.ok).json(result);
+  } catch (error) {
+    res.status(statusCodes.internalServerError).json({ error: error });
+  }
+};
 
 export const fetch_product = async (req, res) => {
   try {
@@ -125,7 +126,7 @@ export const getLowStockCount = async (req, res) => {
 export const alertLowStock = async (req, res) => {
   try {
     const userId = req?.query?.userId;
-    const quantityAlert = parseInt(req.query.quantityAlert || "50", 10);
+    const quantityAlert = parseInt(req?.query?.quantityAlert || "50", 10);
 
     if (!userId) {
       return res.status(statusCodes.badRequest).json({
@@ -136,6 +137,13 @@ export const alertLowStock = async (req, res) => {
 
     const lowStockProducts = await notifyQuantityAlert(userId, quantityAlert);
 
+    if (lowStockProducts == null) {
+      return res.status(statusCodes.notFound).json({
+        success: false,
+        message: messages.data_not_found,
+      });
+    }
+
     if (lowStockProducts.length > 0) {
       return res.status(statusCodes.ok).json({
         success: true,
@@ -145,13 +153,14 @@ export const alertLowStock = async (req, res) => {
     } else {
       return res.status(statusCodes.notFound).json({
         success: false,
-        message: "No low stock products found",
+        message: messages.data_not_found,
       });
     }
   } catch (error) {
+    console.error(error);
     return res.status(statusCodes.internalServerError).json({
       success: false,
-      message: messages.fetching_failed || "Internal server error",
+      message: messages.fetching_failed,
     });
   }
 };
@@ -162,14 +171,13 @@ export const handlePurchase = async (req, res) => {
 
     const updatedProduct = await updateAvgCost(productId, qty, price);
     return res.status(statusCodes.ok).json({
-      message: "Purchase processed and average cost updated successfully!",
+      message: messages.data_update_success,
       product: updatedProduct,
     });
   } catch (error) {
     return res.status(statusCodes.internalServerError).json({
-      message: "Error processing purchase",
+      message: messages.data_update_error,
       error: error.message,
     });
   }
 };
-

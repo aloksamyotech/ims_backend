@@ -205,15 +205,6 @@ export const deleteById = async (id) => {
 };
 
 export const handlePurchaseStatus = async (id, action) => {
-  const updateProductQuantity = async (productId, quantity) => {
-    const product = await ProductSchemaModel.findById(productId);
-    if (!product) {
-      throw new Error(`${messages.data_not_found} ${productId}`);
-    }
-    product.quantity = (Number(product?.quantity) || 0) + Number(quantity);
-    await product.save();
-  };
-
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new Error(messages.invalid_format);
@@ -227,7 +218,6 @@ export const handlePurchaseStatus = async (id, action) => {
       if (action === 'approve') {
         purchase.status = 'completed';
         for (const product of purchase?.products || []) {
-          await updateProductQuantity(product?.productId, product?.quantity); 
           await updateAvgCost(product?.productId, product?.quantity, product?.price); 
         }
       } else if (action === 'cancel') {
