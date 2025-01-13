@@ -34,6 +34,8 @@ app.use("/api/order", orderRouter);
 app.use("/api/purchase", purchaseRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/subscription", subscriptionRouter);
+app.use("/api/employee", employeeRouter);
+app.use("/api/permissions" , empPermissionRouter);
 
 connectDb();
 const port = process.env.PORT;

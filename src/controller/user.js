@@ -51,6 +51,7 @@ export const fetchById_User = async (req, res) => {
 export const loginUser = async (req, res) => {
   const { email, password } = req?.body;
   const result = await login(email, password);
+  console.log(result);
   if (result.success) {
     return res
       .status(statusCodes.ok)
