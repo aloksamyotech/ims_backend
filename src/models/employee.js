@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { tableNames } from "../common/constant.js";
 import UserSchemaModel from "./user.js";
+import uniqueValidator from "mongoose-unique-validator";
 
 const EmployeeSchema = new mongoose.Schema(
   {
@@ -17,6 +18,8 @@ const EmployeeSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
+      unique: true,
+      lowercase: true,
       trim: true,
     },
     password: {
@@ -46,6 +49,8 @@ const EmployeeSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+EmployeeSchema.plugin(uniqueValidator);
 
 EmployeeSchema.pre("save", async function (next) {
   try {

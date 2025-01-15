@@ -51,10 +51,11 @@ export const fetchById = async (id) => {
 
 export const login = async (email, password) => {
   try {
+    const normalizedEmail = email.trim().toLowerCase();
     let user =
-      (await UserSchemaModel.findOne({ email })) ||
-      (await AdminSchemaModel.findOne({ email })) ||
-      (await EmployeeSchemaModel.findOne({ email }));
+      (await UserSchemaModel.findOne({ email: normalizedEmail })) ||
+      (await AdminSchemaModel.findOne({ email: normalizedEmail })) ||
+      (await EmployeeSchemaModel.findOne({ email: normalizedEmail }));
 
     if (!user) {
       return { success: false, message: messages.user_not_found };
