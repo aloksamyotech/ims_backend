@@ -42,7 +42,7 @@ export const fetch = async (req) => {
       condition_obj.userId = userId; 
     }
 
-    return await CategorySchemaModel.find(condition_obj);
+    return await CategorySchemaModel.find(condition_obj).sort({ createdAt: -1 });
   } catch (error) {
     return error;
   }

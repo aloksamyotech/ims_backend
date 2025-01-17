@@ -3,20 +3,22 @@ import SubscriptionSchemaModel from "../models/subscription.js";
 
 export const save = async (req) => {
   try {
-    const {
+    const { title, desc, amount, discount, noOfDays } = req?.body;
+
+    const existingTitle = await SubscriptionSchemaModel.findOne({
+      title,
+    });
+
+    if (existingTitle) {
+      return { message: messages.already_exist };
+    }
+
+    const subscriptionModel = new SubscriptionSchemaModel({
       title,
       desc,
       amount,
       discount,
       noOfDays,
-    } = req?.body;
-
-    const subscriptionModel = new SubscriptionSchemaModel({
-        title,
-        desc,
-        amount,
-        discount,
-        noOfDays,
     });
 
     return await subscriptionModel.save();
@@ -26,14 +28,17 @@ export const save = async (req) => {
 };
 
 export const fetch = async (req) => {
-    try {
-      const condition_obj = req?.query;
-      const subscriptionList = await SubscriptionSchemaModel.find({...condition_obj, isDeleted: false,});
-      return subscriptionList;
-    } catch (error) {
-      return error;
-    }
-  };
+  try {
+    const condition_obj = req?.query;
+    const subscriptionList = await SubscriptionSchemaModel.find({
+      ...condition_obj,
+      isDeleted: false,
+    }).sort({ createdAt: -1 });
+    return subscriptionList;
+  } catch (error) {
+    return error;
+  }
+};
 
 export const fetchById = async (id) => {
   try {
@@ -56,7 +61,6 @@ export const update = async (id, updateData) => {
   }
 };
 
-
 export const deleteById = async (id) => {
   const subscription = await SubscriptionSchemaModel.findById(id);
   if (!subscription) {
@@ -68,7 +72,9 @@ export const deleteById = async (id) => {
 
 export const countSubscription = async (req) => {
   try {
-    const subscriptionCount = await SubscriptionSchemaModel.countDocuments({ isDeleted: false });
+    const subscriptionCount = await SubscriptionSchemaModel.countDocuments({
+      isDeleted: false,
+    });
     if (subscriptionCount === 0) {
       return 0;
     }
@@ -77,6 +83,3 @@ export const countSubscription = async (req) => {
     throw new Error(messages.data_not_found);
   }
 };
-
-
-
