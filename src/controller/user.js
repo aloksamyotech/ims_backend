@@ -8,6 +8,7 @@ import {
   changePasswordService,
   updateStatus,
   countCompany,
+  getAiresponse,
 } from "../services/user.js";
 import { messages, statusCodes } from "../common/constant.js";
 
@@ -158,6 +159,22 @@ export const changeCompanyStatus = async (req, res) => {
 export const getCompanyCount = async (req, res) => {
   try {
     const companyCount = await countCompany();
+    res.status(statusCodes.ok).json({
+      success: true,
+      message: messages.fetching_success,
+      count: companyCount,
+    });
+  } catch (error) {
+    res.status(statusCodes.internalServerError).json({
+      success: false,
+      message: messages.fetching_failed,
+    });
+  }
+};
+
+export const getAiReportData = async (req, res) => {
+  try {
+    const companyCount = await getAiresponse(req);
     res.status(statusCodes.ok).json({
       success: true,
       message: messages.fetching_success,

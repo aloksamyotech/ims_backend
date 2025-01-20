@@ -79,7 +79,6 @@ const ProductSchema = new mongoose.Schema(
 );
 
 ProductSchema.plugin(uniqueValidator);
-
 const generateProductNumber = async () => {
   const lastProduct = await ProductSchemaModel.findOne()
     .sort({ createdAt: -1 })
@@ -88,7 +87,6 @@ const generateProductNumber = async () => {
     ? parseInt(lastProduct.product_no.split("-")[1])
     : 0;
   const newProductNumber = lastProductNumber + 1;
-
   return `PC-${String(newProductNumber).padStart(2, "0")}`;
 };
 
@@ -97,12 +95,10 @@ ProductSchema.pre("save", async function (next) {
     if (this.isNew) {
       this.product_no = await generateProductNumber();
     }
-
     if (this.categoryId) {
       const category = await CategorySchemaModel.findById(this.categoryId);
       this.categoryName = category ? category.catnm : null;
     }
-
     if (this.userId) {
       const user = await UserSchemaModel.findById(this.userId);
       if (!user) {

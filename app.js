@@ -16,7 +16,6 @@ import subscriptionRouter from "./src/routes/subscription.js";
 import employeeRouter from './src/routes/employee.js';
 import empPermissionRouter from "./src/routes/empPermissions.js";
 import chatbotRouter from "./src/routes/chatbot.js";
-import multer from "multer";
 
 const app = express();
 

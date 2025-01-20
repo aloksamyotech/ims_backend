@@ -5,6 +5,7 @@ import EmployeeSchemaModel from "../models/employee.js";
 import EmpPermissionSchemaModel from "../models/empPermissions.js";
 import jwt from "jsonwebtoken";
 import { messages } from "../common/constant.js";
+import { testInput } from "../common/nlp/nlp.js";
 
 export const save = async (req) => {
   try {
@@ -203,3 +204,15 @@ export const countCompany = async (req) => {
     throw new Error(messages.data_not_found);
   }
 };
+
+export const getAiresponse = async (req, res) => {
+  try {
+    const rawtext = req?.body?.text
+    const response = await testInput(rawtext)
+    return response
+
+  } catch (error) {
+    throw new Error(messages.data_not_found);
+
+  }
+}
