@@ -5,45 +5,51 @@ import UserSchemaModel from "../models/user.js";
 
 export const save = async (req) => {
   try {
-    const {
-      name,
-      email,
-      password,
-      phone,
-      address,
-      userId,
-    } = req?.body;
+    const { name, email, password, phone, address, userId } = req?.body;
 
     const user = await UserSchemaModel.findById(userId);
     if (!user) {
       throw new Error(messages.data_not_found);
     }
+
+    const existingEmployee = await EmployeeSchemaModel.findOne({
+      email,
+      userId,
+      isDeleted: false,
+    });
+
+    if (existingEmployee) {
+      return { message: messages.already_exist };
+    }
+
     const encryptedPassword = encryptText(password);
     const employeeModel = new EmployeeSchemaModel({
       name,
       email,
-      password : encryptedPassword,
+      password: encryptedPassword,
       phone,
       address,
-      userId
+      userId,
     });
 
     return await employeeModel.save();
   } catch (error) {
-    return error;
+    return { error: error.message };
   }
 };
 
 export const fetch = async (req) => {
   try {
-    const { userId } = req?.query; 
-    const condition_obj = { isDeleted: false }; 
+    const { userId } = req?.query;
+    const condition_obj = { isDeleted: false };
 
     if (userId) {
       condition_obj.userId = userId;
     }
 
-    const employeeList = await EmployeeSchemaModel.find(condition_obj);
+    const employeeList = await EmployeeSchemaModel.find(condition_obj).sort({
+      createdAt: -1,
+    });
     return employeeList;
   } catch (error) {
     throw new Error(messages.fetching_failed);
@@ -90,13 +96,13 @@ export const countEmployee = async (req) => {
       throw new Error("userId is required");
     }
 
-    const employeeCount = await EmployeeSchemaModel.find({ 
+    const employeeCount = await EmployeeSchemaModel.find({
       isDeleted: false,
-      userId: userId 
+      userId: userId,
     });
 
     if (employeeCount === 0) {
-      return { message: messages.data_not_found};
+      return { message: messages.data_not_found };
     }
 
     return employeeCount.length;
@@ -104,8 +110,3 @@ export const countEmployee = async (req) => {
     throw new Error(messages.data_not_found);
   }
 };
-
-
-
-
-

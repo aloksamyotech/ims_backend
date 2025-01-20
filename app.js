@@ -18,8 +18,6 @@ import empPermissionRouter from "./src/routes/empPermissions.js";
 import chatbotRouter from "./src/routes/chatbot.js";
 
 const app = express();
-
-app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 app.use(express.json());

@@ -15,23 +15,36 @@ export const save = async (req) => {
 
     const user = await UserSchemaModel.findById(userId);
     if (!user) {
-      throw new Error(messages.data_not_found);
+      return { message: messages.data_not_found }; 
     }
+
+    const existingCustomer = await CustomerSchemaModel.findOne({
+      email,
+      userId,
+      isDeleted: false,
+    });
+
+    if (existingCustomer) {
+      return { message: messages.already_exist };
+    }
+
     const customerModel = new CustomerSchemaModel({
       customernm,
       email,
       phone,
       address,
       isWholesale,
-      userId
+      userId,
     });
 
-    return await customerModel.save();
+    const savedCustomer = await customerModel.save();
+    return savedCustomer; 
   } catch (error) {
-    return error;
+    return { error: error.message};
   }
 };
 
+  
 export const fetch = async (req) => {
   try {
     const { userId, isWholesale } = req?.query; 
@@ -45,7 +58,7 @@ export const fetch = async (req) => {
       condition_obj.isWholesale = isWholesale; 
     }
 
-    const customersList = await CustomerSchemaModel.find(condition_obj);
+    const customersList = await CustomerSchemaModel.find(condition_obj).sort({ createdAt: -1 });
 
     return customersList;
   } catch (error) {

@@ -11,12 +11,23 @@ export const save = async (req) => {
       address,
       typeOfSupplier,
       shopName,
-      userId
+      userId,
     } = req?.body;
     const user = await UserSchemaModel.findById(userId);
     if (!user) {
       throw new Error(messages.data_not_found);
     }
+
+    const existingSupplier = await SupplierSchemaModel.findOne({
+      email,
+      userId,
+      isDeleted: false,
+    });
+
+    if (existingSupplier) {
+      return { message: messages.already_exist };
+    }
+
     const supplierModel = new SupplierSchemaModel({
       suppliernm,
       email,
@@ -24,29 +35,30 @@ export const save = async (req) => {
       address,
       typeOfSupplier,
       shopName,
-      userId
+      userId,
     });
-    return await supplierModel.save();
+
+    const savedCustomer = await supplierModel.save();
+    return savedCustomer;
   } catch (error) {
-    throw new Error(messages.data_add_error);
+    return { error: error.message };
   }
 };
 
 export const fetch = async (req) => {
   try {
-    const { userId } = req?.query; 
+    const { userId } = req?.query;
     const condition_obj = { isDeleted: false };
 
     if (userId) {
-      condition_obj.userId = userId; 
+      condition_obj.userId = userId;
     }
 
-    return await SupplierSchemaModel.find(condition_obj);
+    return await SupplierSchemaModel.find(condition_obj).sort({ createdAt : -1});
   } catch (error) {
     throw new Error(messages.fetching_failed);
   }
 };
-
 
 export const fetchById = async (id) => {
   try {
@@ -87,8 +99,8 @@ export const countSupplier = async (req) => {
     if (!userId) {
       throw new Error("userId is required");
     }
-    
-    const condition_obj = { isDeleted: false }; 
+
+    const condition_obj = { isDeleted: false };
 
     if (userId) {
       condition_obj.userId = userId;
@@ -97,7 +109,7 @@ export const countSupplier = async (req) => {
     const supplierCount = await SupplierSchemaModel.find(condition_obj);
 
     if (supplierCount === 0) {
-      return { message: messages.data_not_found};
+      return { message: messages.data_not_found };
     }
 
     return supplierCount.length;

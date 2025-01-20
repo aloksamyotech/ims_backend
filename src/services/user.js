@@ -34,7 +34,7 @@ export const fetch = async (req) => {
     const condition_obj = req?.query;
     const usersList = await UserSchemaModel.find({
       ...condition_obj,
-    });
+    }).sort({ createdAt: -1 });
     return usersList;
   } catch (error) {
     return error;
