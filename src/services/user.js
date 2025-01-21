@@ -205,14 +205,12 @@ export const countCompany = async (req) => {
   }
 };
 
-export const getAiresponse = async (req, res) => {
+export const getAiresponse = async (req) => {
   try {
-    const rawtext = req?.body?.text
-    const response = await testInput(rawtext)
-    return response
-
+    const rawtext = req?.body?.text;
+    const response = await testInput(rawtext);
+    return response;
   } catch (error) {
     throw new Error(messages.data_not_found);
-
   }
-}
+};

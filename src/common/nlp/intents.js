@@ -367,6 +367,9 @@ export const getProductStockDetail = [
   "how many pieces are available for product",
   "what is the stock availability for product",
   "can I order product if stock is low",
+  "how many remaining product",
+  "how many remaining product quantity",
+  "how many remaining product stock",
   "is product stock replenished",
   "how soon will product be restocked",
   "is product in high demand, what is the stock",
@@ -376,6 +379,7 @@ export const getProductStockDetail = [
 
 export const getProductPriceDetail = [
   "what is the price of product",
+  "what is the price of available product",
   "how much does product cost",
   "what is the cost of product",
   "how much is product",
@@ -393,10 +397,6 @@ export const getProductPriceDetail = [
   "how much is product worth",
   "can you give me the price of product",
   "what is the selling price of product",
-  "what is the price of product in USD",
-  "what is the price of product in EUR",
-  "what is the price of product in INR",
-  "how much is product in [Currency]",
   "what is the price for product if I want 1 unit",
   "how much is 1 unit of product",
   "how much for 1 unit of product",
@@ -414,4 +414,73 @@ export const getProductPriceDetail = [
   "can I get product at a discounted price",
   "what is the price of product with the offer",
 ];
+
+export const soldProductDetail = [
+  "how many products are left",
+  "how many sold product",
+  "how much product sold",
+  "what is the total quantity of products sold",
+  "how many units have been sold",
+  "how many items are remaining",
+  "what is the remaining stock of products",
+  "how much stock is left",
+  "how much revenue has been generated from sold products",
+  "what is the total sales value for the products sold",
+  "what is the total amount of money earned from product sales",
+  "how many product have been sold",
+  "what is the sales quantity for product",
+  "how much of product has been sold",
+  "how are the sales performing for this product",
+  "what is the sales trend for product",
+  "how many units are sold this month",
+  "how many products were sold last month",
+  "how many units have been sold this week",
+  "what is the total sales of products in the last quarter",
+  "how many products have been sold in total",
+  "what is the total number of units sold",
+  "how many orders are yet to be fulfilled",
+  "how many products are pending for shipment",
+  "what is the status of my sold products",
+  "how many products were sold in the category",
+  "what is the total sales for category products",
+  "sold product list",
+  "sold product quantity",
+];
+
+export const lowStockProductDetail = [
+    "which products are low in stock",
+    "which products have low stock",
+    "what products are running out of stock",
+    "which products are about to be out of stock",
+    "which products need restocking",
+    "what products have less than quantity alert stock",
+    "which products are below the minimum stock level",
+    "show me low stock products",
+    "which products are critically low in stock",
+    "what products have the lowest stock",
+    "how many products are below stock threshold",
+    "which products need to be reordered",
+    "which products are running low",
+    "which items have low inventory",
+    "what is the status of low stock products",
+    "how many units of products are low in stock",
+    "which products have less than the required stock",
+    "show me products with low inventory",
+    "which products have a stock warning",
+    "which products are at risk of stockout"
+  ];
+
+  export const productCategoryActions = [
+    "assign product to category",
+    "filter products by category",
+    "sort products by category",
+    "show me new arrivals in category",
+    "find products in category",
+    "show me discounted products in category",
+    "search products in category",
+    "view all products from category"
+  ];
+  
+ 
+
 

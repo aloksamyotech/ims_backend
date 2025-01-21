@@ -17,6 +17,9 @@ import employeeRouter from './src/routes/employee.js';
 import empPermissionRouter from "./src/routes/empPermissions.js";
 import chatbotRouter from "./src/routes/chatbot.js";
 
+import customCron from "./src/common/cron.js";
+
+
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
@@ -41,3 +44,5 @@ const port = process.env.PORT;
 app.listen(port, () => {
   console.log("Server is listening on port :", port);
 });
+
+customCron.sendEmailAllUser();

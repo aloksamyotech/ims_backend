@@ -1,10 +1,13 @@
 import { NlpManager } from "node-nlp";
 import {
-    productDetailPhrases,
+  productDetailPhrases,
   listCategoriesPhrases,
   getSingleProductDetail,
   getProductPriceDetail,
-  getProductStockDetail
+  getProductStockDetail,
+  soldProductDetail,
+  lowStockProductDetail,
+  productCategoryActions,
 } from "./intents.js";
 
 const manager = new NlpManager({ languages: ["en"] });
@@ -36,11 +39,25 @@ export const testInput = async (input) => {
   getProductPriceDetail.forEach((phrase) =>
     manager.addDocument("en", phrase, "product.price")
   );
+
+  soldProductDetail.forEach((phrase) =>
+    manager.addDocument("en", phrase, "product.sold")
+  );
+
+  lowStockProductDetail.forEach((phrase) =>
+    manager.addDocument("en", phrase, "product.lowStock")
+  );
+
+  productCategoryActions.forEach((phrase) =>
+    manager.addDocument("en", phrase, "findproduct.category")
+  );
+
   await manager.train();
   await manager.save();
   const result = await getBestIntent(input);
   return result;
 };
+
 const getBestIntent = async (input) => {
   try {
     const response = await manager.process("en", input);

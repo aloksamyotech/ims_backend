@@ -55,11 +55,23 @@ export const bulkUploadProducts = async (req) => {
   const { productsData } = req?.body;
 
   try {
- 
     const savedProducts = [];
 
     for (const product of productsData) {
-      const { userId,productnm, buyingPrice, sellingPrice, quantity, quantityAlert, tax, margin, notes, categoryId, categoryName, avgCost } = product;
+      const {
+        userId,
+        productnm,
+        buyingPrice,
+        sellingPrice,
+        quantity,
+        quantityAlert,
+        tax,
+        margin,
+        notes,
+        categoryId,
+        categoryName,
+        avgCost,
+      } = product;
 
       let category;
 
@@ -68,12 +80,14 @@ export const bulkUploadProducts = async (req) => {
       }
 
       if (!category && categoryName) {
-        category = await CategorySchemaModel.findOne({ catnm: categoryName });
+        category = await CategorySchemaModel.findOne({
+          catnm: categoryName.toLowerCase(),
+        });
       }
 
       if (!category) {
         category = new CategorySchemaModel({
-          catnm: categoryName,
+          catnm: categoryName.toLowerCase(),
           userId,
         });
         await category.save();
@@ -81,7 +95,7 @@ export const bulkUploadProducts = async (req) => {
 
       const productWithUserId = {
         ...product,
-        userId, 
+        userId,
         categoryId: category._id,
         categoryName: category.catnm,
       };
@@ -93,7 +107,7 @@ export const bulkUploadProducts = async (req) => {
 
     return savedProducts;
   } catch (error) {
-    throw new Error(messages.data_update_error , error.message);
+    throw new Error(messages.data_update_error, error.message);
   }
 };
 
@@ -268,4 +282,3 @@ export const updateAvgCost = async (productId, qty, price) => {
     throw new Error("Error updating average cost");
   }
 };
-
