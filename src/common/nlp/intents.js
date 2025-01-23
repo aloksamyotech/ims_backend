@@ -1,10 +1,29 @@
+export const greet = [
+    "Hii",
+    "hi",
+    "Hello",
+    "Hey",
+    "Good morning",
+    "Good evening",
+    "How are you?",
+    "Howdy",
+    "Hi there",
+    "Hello there"
+  ]
+
 export const listCategoriesPhrases = [
+  "category list",
   "show me all categories",
+  "list of categories",
+  "list of all categories",
   "get all categories",
   "list all product categories",
   "display all categories",
   "list product categories",
   "give me all categories",
+  "give me the all category",
+  "show category",
+  "all category list",
   "categories list",
   "fetch all categories",
   "show categories",
@@ -119,6 +138,9 @@ export const listCategoriesPhrases = [
 ];
 
 export const productDetailPhrases = [
+  "products list",
+  "list of all products",
+  "list of products",
   "show me all products",
   "list all products",
   "get all products",
@@ -337,6 +359,14 @@ export const getProductStockDetail = [
   "Is stock of product available",
   "Is quantity of product available",
   "can I get stock of product",
+  "total stock of product",
+  "total quantity of product",
+  "product stock",
+  "product quantity",
+  "stock of product",
+  "stock product",
+  "quantity product",
+  "quantity of product",
   "can I get quantity of product",
   "available quantity of product",
   "remaining stock of product",
@@ -368,6 +398,7 @@ export const getProductStockDetail = [
   "what is the stock availability for product",
   "can I order product if stock is low",
   "how many remaining product",
+  "what is the total stock of product",
   "how many remaining product quantity",
   "how many remaining product stock",
   "is product stock replenished",
@@ -392,6 +423,7 @@ export const getProductPriceDetail = [
   "can I get the price of product",
   "what is the cost of product today",
   "how much for product",
+  "product price",
   "what is the price of product today",
   "what is the rate of product",
   "how much is product worth",
@@ -471,15 +503,20 @@ export const lowStockProductDetail = [
   ];
 
   export const productCategoryActions = [
-    "assign product to category",
-    "filter products by category",
-    "sort products by category",
-    "show me new arrivals in category",
-    "find products in category",
-    "show me discounted products in category",
-    "search products in category",
-    "view all products from category"
+    "in which category the product belongs",
+    "which category does this product belong to",
+    "find category for product",
+    "product category",
+    "category of product",
+    "show me the category of product",
+    "could you tell me the category if this product",
+    "get me the category of this product",
+    "what category is this product",
+    "tell me the category of product",
+    "which category is this product",
+    "what is the category of product",
   ];
+  
   
  
 
