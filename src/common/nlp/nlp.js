@@ -1,146 +1,95 @@
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NlpManager } from "node-nlp";
-import {
-  productDetailPhrases,
-  listCategoriesPhrases,
-  getSingleProductDetail,
-  getProductPriceDetail,
-  getProductStockDetail,
-  lowStockProductDetail,
-  productCategoryActions,
-} from "./intents.js";
 import dotenv from "dotenv";
-import ProductSchemaModel from "../../models/products.js";
-import CategorySchemaModel from "../../models/category.js";
+import mongoose from "mongoose";
+import UserSchemaModel from "../../models/user.js";
+import { greet } from "./intents.js";
 
 dotenv.config();
 
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const mongoUri = process.env.DBURL;
+
+mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
+
+const intentMappings = [
+  { phrases: greet, intent: "greetings" },
+];
+
 const manager = new NlpManager({ languages: ["en"] });
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+intentMappings.forEach(({ phrases, intent }) => {
+  phrases.forEach((phrase) => manager.addDocument("en", phrase, intent));
 });
 
-let databaseProducts = [];
-
-const initializeNlpManager = async () => {
-  listCategoriesPhrases.forEach((phrase) =>
-    manager.addDocument("en", phrase, "list.categories")
-  );
-
-  productDetailPhrases.forEach((phrase) =>
-    manager.addDocument("en", phrase, "allproduct.detail")
-  );
-
-  getSingleProductDetail.forEach((phrase) =>
-    manager.addDocument("en", phrase, "singleproduct.detail")
-  );
-
-  getProductStockDetail.forEach((phrase) =>
-    manager.addDocument("en", phrase, "product.stock")
-  );
-
-  getProductPriceDetail.forEach((phrase) =>
-    manager.addDocument("en", phrase, "product.price")
-  );
-
-  lowStockProductDetail.forEach((phrase) =>
-    manager.addDocument("en", phrase, "product.lowStock")
-  );
-
-  productCategoryActions.forEach((phrase) =>
-    manager.addDocument("en", phrase, "findproduct.category")
-  );
-
-  await manager.train();
-  await manager.save();
-
-  databaseProducts = await ProductSchemaModel.find({}, "productnm");
-};
-
-initializeNlpManager();
-
-export const testInput = async (input) => {
-  const nlpResult = await getBestIntent(input);
-
-  if (!nlpResult.intent || nlpResult.confidence < 0.5) {
-    const chatGptResponse = await askChatGpt(input);
-    return {
-      intent: null,
-      message: chatGptResponse,
-      source: "ChatGPT",
-    };
-  }
-
-  const dbResponse = await handleDatabaseQuery(nlpResult.intent, input);
-  return {
-    intent: nlpResult.intent,
-    message: dbResponse,
-    source: "NLP",
-  };
-};
+await manager.train();
+await manager.save();
 
 const getBestIntent = async (input) => {
   const response = await manager.process("en", input);
   return {
     intent: response.intent,
     confidence: response.score,
+    entities: response.entities,
   };
 };
 
-const askChatGptForQuery = async (input) => {
+const getDynamicGreeting = (userName) => {
+  const greetResponses = [
+    "How can I assist you today?",
+    "What can I do for you?",
+    "How’s it going?",
+    "How can I help?",
+  ];
+  const randomIndex = Math.floor(Math.random() * greetResponses.length);
+  return `Hi!, ${userName}. How are you? ${greetResponses[randomIndex]}`;
+};
+
+const generateResponseWithGemini = async (input) => {
   try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "user",
-          content: `Generate a MongoDB query to fetch data based on the following: ${input}`,
-        },
-      ],
-    });
-    const query = completion.choices[0].message.content;
-    console.log(query);
-    return query;
+    const result = await model.generateContent(input); 
+    return result.response.text().trim() || "Sorry, I didn't understand your question.";
   } catch (error) {
-    console.error("Error with OpenAI API:", error);
-    return "Sorry, I couldn't process your request at the moment.";
+    return `An error occurred while generating a response: ${error.message}`;
   }
 };
 
-const executeDatabaseQuery = async (query) => {
+export const testInput = async (input, userId) => {
   try {
-    const results = await ProductSchemaModel.find(query); 
-    console.log(results);
-    return results;
+    const user = await UserSchemaModel.findOne({ _id: userId });
+
+    if (!user) {
+      return {
+        intent: "error",
+        message: "User not found.",
+        source: "System",
+      };
+    }
+
+    const nlpResult = await getBestIntent(input);
+
+    if (nlpResult.intent === "greetings" && nlpResult.confidence >= 0.5) {
+      return {
+        intent: "greetings",
+        message: user?.name ? getDynamicGreeting(user.name) : "Hi there! How are you?",
+        source: "NLP",
+      };
+    }
+
+    const generalResponse = await generateResponseWithGemini(input); 
+    return {
+      intent: "general",
+      message: generalResponse,
+      source: "Gemini",
+    };
+
   } catch (error) {
-    console.error("Database query failed:", error);
-    return "Sorry, we couldn't fetch data from the database.";
-  }
-};
-
-const handleDatabaseQuery = async (intent, input) => {
-  const query = await askChatGptForQuery(input);
-  
-  if (!query || query.includes("error")) {
-    return "No valid query generated.";
-  }
-
-  const results = await executeDatabaseQuery(JSON.parse(query)); 
-  return results;
-};
-
-const askChatGpt = async (input) => {
-  const prompt = `Provide a useful response to the following query: ${input}`;
-  try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: prompt }],
-    });
-    const response = completion.choices[0].message.content;
-    return response;
-  } catch (error) {
-    console.error("Error with OpenAI API:", error);
-    return "I encountered an issue while processing your request.";
+    return {
+      intent: "error",
+      message: `An error occurred while processing your request. Error: ${error.message}`,
+      source: "System",
+    };
   }
 };
