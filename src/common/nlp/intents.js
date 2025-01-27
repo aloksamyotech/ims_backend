@@ -6,7 +6,6 @@ export const greet = [
     "Good morning",
     "Good evening",
     "How are you?",
-    "Howdy",
     "Hi there",
     "Hello there"
   ]
@@ -15,6 +14,7 @@ export const listCategoriesPhrases = [
   "category list",
   "show me all categories",
   "list of categories",
+  "list all categories",
   "list of all categories",
   "get all categories",
   "list all product categories",
@@ -295,7 +295,7 @@ export const getSingleProductDetail = [
   "give me product specifications",
   "I want product details for this item",
   "get the description of a product",
-  "show the product name and details",
+  "show the product details",
   "fetch product specifications",
   "what is the information about this product",
   "retrieve the details for a specific product",
