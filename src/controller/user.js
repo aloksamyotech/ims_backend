@@ -174,11 +174,11 @@ export const getCompanyCount = async (req, res) => {
 
 export const getAiReportData = async (req, res) => {
   try {
-    const companyCount = await getAiresponse(req);
+    const result = await getAiresponse(req);
     res.status(statusCodes.ok).json({
       success: true,
-      message: messages.fetching_success,
-      count: companyCount,
+      data: result.data,
+      message: result.data.response
     });
   } catch (error) {
     res.status(statusCodes.internalServerError).json({
