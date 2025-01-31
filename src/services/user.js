@@ -5,7 +5,7 @@ import EmployeeSchemaModel from "../models/employee.js";
 import EmpPermissionSchemaModel from "../models/empPermissions.js";
 import jwt from "jsonwebtoken";
 import { messages } from "../common/constant.js";
-import { testInput } from "../common/nlp/nlp.js";
+import { testInput } from "../common/ai/index.js";
 
 export const save = async (req) => {
   try {
