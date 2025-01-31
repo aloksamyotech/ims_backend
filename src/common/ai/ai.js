@@ -15,8 +15,9 @@ import {
   emptyResponse,
   commonResponse,
 } from "./responseFormat.js";
-import fetch from "node-fetch";
-globalThis.fetch = fetch; 
+import fetch from 'node-fetch';
+globalThis.fetch = fetch;
+globalThis.Headers = fetch.Headers;
 
 
 dotenv.config();
