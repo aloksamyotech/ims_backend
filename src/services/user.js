@@ -5,7 +5,7 @@ import EmployeeSchemaModel from "../models/employee.js";
 import EmpPermissionSchemaModel from "../models/empPermissions.js";
 import jwt from "jsonwebtoken";
 import { messages } from "../common/constant.js";
-import { testInput } from "../common/ai/index.js";
+import { testInput } from "../common/ai/ai.js";
 
 export const save = async (req) => {
   try {
@@ -208,11 +208,6 @@ export const countCompany = async (req) => {
 export const getAiresponse = async (req) => {
   try {
     const rawtext = req?.body?.text;
-    //const userId = req?.body?.userId;
-   
-    // if (!userId) {
-    //   throw new Error("User ID is required");
-    // }
     const response = await testInput(rawtext);
     return response;
   } catch (error) {
