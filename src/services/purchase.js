@@ -265,4 +265,53 @@ export const countPurchases = async (req) => {
   }
 };
 
+export const getTotalPurchaseForEachCompany = async (req) => {
+  try {
+    const { userId } = req?.query;
+    const condition_obj = { isDeleted: false };
+
+    if (userId) {
+      condition_obj.userId = new mongoose.Types.ObjectId(userId);
+    }
+
+    const totalPurchasePerCompany = await PurchaseSchemaModel.aggregate([
+      { $match: condition_obj },
+      {
+        $group: {
+          _id: "$userId",
+          total_purchase_amount: { $sum: "$total" },
+        },
+      },
+      {
+        $lookup: {
+          from: tableNames.users,
+          localField: "_id",
+          foreignField: "_id",
+          as: "companyInfo",
+        },
+      },
+      {
+        $unwind: {
+          path: "$companyInfo",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          companyId: "$_id",
+          companyName: "$companyInfo.name",
+          total_purchase_amount: 1,
+        },
+      },
+      {
+        $sort: { total_purchase_amount: -1 },
+      },
+    ]);
+
+    return totalPurchasePerCompany;
+  } catch (error) {
+    throw new Error(messages.data_not_found);
+  }
+};
+
 

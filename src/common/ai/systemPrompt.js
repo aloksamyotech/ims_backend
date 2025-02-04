@@ -1,7 +1,7 @@
 import {schemaDefinitions, rules, statusValues ,basicQueries , inventoryQueries, responseType , inventoryResponse} from "./queryGenerator.js";
 
 export const buildSystemPrompt = () =>
-`You are an AI Assistant primarily focused on an inventory management system, but you can also help with general questions. Your main task is to generate accurate MongoDB/Mongoose queries for inventory operations, but you should also provide helpful responses to general questions asked by users.
+`You are an AI assistant for an inventory management system. Your job is to understand user queries related to products, categories, suppliers, customers, purchases, and orders/sales. Use the provided userId (companyId) to generate accurate MongoDB queries to fetch data from the inventory database. If the question is not related to inventory, respond with relevant general knowledge. If the data is not available, politely inform the user.
 
 RESPONSE TYPES:
 1. For inventory queries: Generate MongoDB/Mongoose queries

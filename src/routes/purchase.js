@@ -9,5 +9,6 @@ purchaseRouter.delete("/deleteById/:id", PurchaseController.deletePurchase);
 purchaseRouter.get("/fetchSupplierProductReport", PurchaseController.getSupplierProductReport);
 purchaseRouter.get("/count", PurchaseController.getPurchaseCount);  
 purchaseRouter.patch("/update-status/:id", PurchaseController.updatePurchaseStatus); 
+purchaseRouter.get("/total-purchase", PurchaseController.getCompanyTotalPurchase);
 
 export default purchaseRouter;

@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from "dotenv";
 import ProductSchemaModel from "../../models/products.js";
 import CategorySchemaModel from "../../models/category.js";
-import SupplierSchemeModel from "../../models/supplier.js";
+import SupplierSchemaModel from "../../models/supplier.js";
 import CustomerSchemaModel from "../../models/customer.js";
 import OrderSchemaModel from "../../models/orders.js";
 import PurchaseSchemaModel from "../../models/purchase.js";
@@ -14,7 +14,7 @@ import {
   responseQueryFormat,
   emptyResponse,
   commonResponse,
-} from "./responseFormat.js";  
+} from "./responseFormat.js";
 
 dotenv.config();
 
@@ -22,7 +22,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const systemPrompt = buildSystemPrompt();
 
-const generateQueryAndExecution = async (input) => {
+const generateQueryAndExecution = async (input, userId) => {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
@@ -30,7 +30,13 @@ const generateQueryAndExecution = async (input) => {
 
 User Question: "${input}"
 
-Generate the appropriate response in JSON format:`;
+Generate the appropriate response in JSON format. Use '${userId}' as the userId value in queries.
+Example format:
+{
+  "mongooseQuery": "await ProductSchemaModel.find({ userId: '${userId}' }).select('productnm sellingPrice quantity')",
+  "schemaUsed": "SchemaModelName",
+  "queryType": "query_type"
+}`;
 
     const result = await model.generateContent(prompt);
     const response = result.response.text();
@@ -45,20 +51,18 @@ Generate the appropriate response in JSON format:`;
         return parsedResponse;
       }
 
-      return {
-        mongooseQuery: parsedResponse.mongooseQuery,
-        schemaUsed: parsedResponse.schemaUsed,
-        queryType: parsedResponse.queryType,
-      };
+      return parsedResponse;
     } catch (error) {
       throw new Error(`Invalid query generation response: ${error.message}`);
     }
   } catch (error) {
+    console.log(error);
     throw new Error(`Query generation failed: ${error.message}`);
   }
 };
 
 const generateResponse = async (input, dbResult, queryType) => {
+  console.log("gjhjjhjh");
   const responsePrompt = `
 Generate a precise and accurate response for this database result:
 
@@ -82,17 +86,19 @@ Generate a clear and accurate response:`;
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     const result = await model.generateContent(responsePrompt);
+    console.log("result::::", result);
     return result.response.text();
   } catch (error) {
+    console.log("error::::", error);
     throw new Error(`Response generation failed: ${error.message}`);
   }
 };
 
-const executeMongooseQuery = async (queryString, schemaUsed) => {
+const executeMongooseQuery = async (queryString, schemaUsed, userId) => {
   const schemaMap = {
     ProductSchemaModel,
     CategorySchemaModel,
-    SupplierSchemeModel,
+    SupplierSchemaModel,
     CustomerSchemaModel,
     OrderSchemaModel,
     PurchaseSchemaModel,
@@ -101,32 +107,41 @@ const executeMongooseQuery = async (queryString, schemaUsed) => {
   };
 
   try {
-    if (queryString.includes(";")) {
-      const wrappedQuery = `
-        return (async () => {
-          try {
-            ${queryString}
-          } catch (error) {
-            console.error('Query execution error:', error);
-            return null;
-          }
-        })();
-      `;
+    let modifiedQuery = queryString.replace(
+      /userId: userId/g,
+      `userId: '${userId}'`
+    );
 
-      const executeQuery = new Function(
-        ...Object.keys(schemaMap),
-        wrappedQuery
+    if (!modifiedQuery.includes("userId:")) {
+      modifiedQuery = modifiedQuery.replace(
+        /find\({/,
+        `find({ userId: '${userId}',`
       );
-
-      return await executeQuery(...Object.values(schemaMap));
-    } else {
-      const executeQuery = new Function(
-        ...Object.keys(schemaMap),
-        `return (async () => { return ${queryString} })();`
+      modifiedQuery = modifiedQuery.replace(
+        /findOne\({/,
+        `findOne({ userId: '${userId}',`
       );
-      return await executeQuery(...Object.values(schemaMap));
     }
+    const wrappedQuery = `
+      return (async () => {
+        try {
+          const result = ${modifiedQuery}
+          if (!result || result.length === 0) {
+            throw new Error("No data found.");
+          }
+          return result;
+        } catch (error) {
+          console.error('Query execution error:', error);
+          return null;
+        }
+      })();
+    `;
+
+    const executeQuery = new Function(...Object.keys(schemaMap), wrappedQuery);
+
+    return await executeQuery(...Object.values(schemaMap));
   } catch (error) {
+    console.log("error---------------------", error);
     throw new Error(`Query execution failed: ${error.message}`);
   }
 };
@@ -144,6 +159,7 @@ const executeWithRetry = async (func, maxRetries = 3, delay = 500) => {
         console.log(`Retrying attempt ${attempt + 1}/${maxRetries}...`);
       }
     } catch (error) {
+      console.log(error);
       if (attempt === maxRetries) throw error;
       await new Promise((resolve) => setTimeout(resolve, delay));
       console.log(`Error in attempt ${attempt}, retrying...`);
@@ -152,12 +168,13 @@ const executeWithRetry = async (func, maxRetries = 3, delay = 500) => {
   return null;
 };
 
-export const testInput = async (input) => {
+export const testInput = async (input, userId) => {
   try {
     const queryData = await executeWithRetry(async () => {
-      return await generateQueryAndExecution(input);
+      return await generateQueryAndExecution(input, userId);
     });
-    console.log("Generated Query Data:", queryData);
+
+    console.log("Generated Query:", queryData);
 
     if (
       queryData.type === "general_response" ||
@@ -175,15 +192,17 @@ export const testInput = async (input) => {
 
     const dbResult = await executeMongooseQuery(
       queryData.mongooseQuery,
-      queryData.schemaUsed
+      queryData.schemaUsed,
+      userId
     );
+
     console.log("Database Result:", dbResult);
 
-    if (dbResult === null) {
+    if (dbResult === null || dbResult.length === 0) {
       const responses = {
         OrderSchemaModel: `No orders found. The customer may not exist in our system.`,
         ProductSchemaModel: `Product not found in the inventory.`,
-        SupplierSchemeModel: `Supplier not found in the system.`,
+        SupplierSchemaModel: `Supplier not found in the system.`,
         CustomerSchemaModel: `Customer not found in the system.`,
         CategorySchemaModel: `Category not found in the system.`,
         PurchaseSchemaModel: `No purchases found for the specified criteria.`,
@@ -206,7 +225,7 @@ export const testInput = async (input) => {
       dbResult,
       queryData.queryType
     );
-
+    console.log("Response:", response);
     return {
       success: true,
       data: {
@@ -216,7 +235,6 @@ export const testInput = async (input) => {
       },
     };
   } catch (error) {
-    console.error("Error in testInput:", error);
     return {
       success: false,
       error: error.message,

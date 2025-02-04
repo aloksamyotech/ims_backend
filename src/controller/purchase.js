@@ -1,4 +1,4 @@
-import { save , fetch , deleteById , fetchById,   handlePurchaseStatus, countPurchases} from "../services/purchase.js";
+import { save , fetch , deleteById , fetchById,   handlePurchaseStatus, countPurchases,getTotalPurchaseForEachCompany} from "../services/purchase.js";
 import { fetchSupplierProductReport } from "../services/reports.js"; 
 import { statusCodes, messages } from "../common/constant.js";
 
@@ -105,3 +105,25 @@ export const getPurchaseCount = async (req, res) => {
     });
   }
 };
+
+export const getCompanyTotalPurchase = async (req, res) => {
+  try {
+    const totalPurchaseData = await getTotalPurchaseForEachCompany(req);
+    if (totalPurchaseData.length === 0) {
+      return res.status(statusCodes.notFound).json({ message: "No purchase data found for any company." });
+    }
+
+    return res.status(statusCodes.ok).json({
+      success: true,
+      message: "Total purchase for each company fetched successfully.",
+      data: totalPurchaseData,
+    });
+  } catch (error) {
+    return res.status(statusCodes.internalServerError).json({
+      success: false,
+      message: "An error occurred while fetching total purchase data.",
+      error: error.message || error,
+    });
+  }
+};
+

@@ -13,7 +13,17 @@ export const responseFormat=
 13. Include all relevant information
 14. Group related information together
 15. Show totals and summaries where applicable
-16. Always use Invoice no for order_id and Purchase no for purchase_id`
+16. Always use Invoice no for order_id and Purchase no for purchase_id
+17.Return the complete stock management report with the following details for each product:
+• Product name
+• Selling price
+• Average cost
+• Quantity available
+• Total sales
+• Total purchases
+• Total profit
+
+Ensure the data is grouped by product and properly formatted, with all relevant fields included in the response.`
 
 export const responseQueryFormat=
 `- list: "Found [X] items: [List with names]"
