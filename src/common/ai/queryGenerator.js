@@ -14,6 +14,7 @@ Example QUERY GENERATION RULES:
 - Always use try-catch in async queries
 - Always use proper field names as defined in schema
 - While generating query for orders and purchases use products.productId while populate products schema
+- If any user ask a questions related to find orders/purchases for particular product,customer/supplier then only generate data related to that not generate any report , instead if user ask any questions related to reports then generate report for that particular question using relevant schema
 
 ✅ CORRECT:
 "await ProductSchemaModel.countDocuments({ userId: userId })"
@@ -22,24 +23,6 @@ Example QUERY GENERATION RULES:
 ❌ INCORRECT:
 "const count = await ProductSchemaModel.countDocuments({ userId: userId })"
 "let products = await ProductSchemaModel.find({ userId: userId })"
-
-2. Schema-Specific Rules:
-Orders/Purchases:
-- Search in products array using products.productName
-- Use embedded customer fields (customerName, customerEmail)
-- Include invoice_no, date, order_status in results
-
-Products:
-- Search by productnm for product queries
-- Include product_no, prices, and categoryName
-- Check isDeleted: false in queries
-
-3. Generate a product sales report showing:
-1. Product name and category
-2. Total quantity sold
-3. Total sales amount
-4. Average selling price
-Consider only completed orders and sort by highest sales.
 
 2. Date Query Rules:
    • ALWAYS use proper date formatting in queries
@@ -63,7 +46,6 @@ ProductSchemaModel:
 - sellingPrice (Number): Selling price
 - avgCost (Number): Average cost
 - quantity (Number): Available quantity
-- quantityAlert (Number): Alert threshold
 - tax (Number): Tax percentage
 - margin (Number): Profit margin
 - notes (String): Product notes

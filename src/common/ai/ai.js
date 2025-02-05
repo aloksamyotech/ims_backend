@@ -24,7 +24,7 @@ const systemPrompt = buildSystemPrompt();
 
 const generateQueryAndExecution = async (input, userId) => {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const prompt = `${systemPrompt}
 
@@ -37,10 +37,9 @@ Example format:
   "schemaUsed": "SchemaModelName",
   "queryType": "query_type"
 }`;
-
     const result = await model.generateContent(prompt);
-    const response = result.response.text();
-
+    let response = result.response.text();
+    response = response.replace(/```json|```/g, "").trim();
     try {
       const parsedResponse = JSON.parse(response);
 
@@ -56,13 +55,11 @@ Example format:
       throw new Error(`Invalid query generation response: ${error.message}`);
     }
   } catch (error) {
-    console.log(error);
     throw new Error(`Query generation failed: ${error.message}`);
   }
 };
 
 const generateResponse = async (input, dbResult, queryType) => {
-  console.log("gjhjjhjh");
   const responsePrompt = `
 Generate a precise and accurate response for this database result:
 
@@ -84,12 +81,10 @@ ${emptyResponse}
 Generate a clear and accurate response:`;
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(responsePrompt);
-    console.log("result::::", result);
     return result.response.text();
   } catch (error) {
-    console.log("error::::", error);
     throw new Error(`Response generation failed: ${error.message}`);
   }
 };
@@ -141,7 +136,6 @@ const executeMongooseQuery = async (queryString, schemaUsed, userId) => {
 
     return await executeQuery(...Object.values(schemaMap));
   } catch (error) {
-    console.log("error---------------------", error);
     throw new Error(`Query execution failed: ${error.message}`);
   }
 };
