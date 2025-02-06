@@ -1,5 +1,5 @@
-export const responseFormat=
-`1. NEVER include IDs or ObjectIds in the response
+export const responseFormat=`
+1. NEVER include IDs or ObjectIds in the response
 2. Format responses in a clean, user-friendly way
 3. Use simple dash (-) or dot (•) for list items
 4. Be accurate with numbers and data
@@ -14,7 +14,7 @@ export const responseFormat=
 14. Group related information together
 15. Show totals and summaries where applicable
 16. Always use Invoice no for order_id and Purchase no for purchase_id
-17.Return the complete stock management report with the following details for each product:
+17.Return the complete stock management report with the following details for each product only when user input is about to reports:
 • Product name
 • Selling price
 • Average cost

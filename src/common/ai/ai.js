@@ -150,13 +150,10 @@ const executeWithRetry = async (func, maxRetries = 3, delay = 500) => {
 
       if (attempt < maxRetries) {
         await new Promise((resolve) => setTimeout(resolve, delay));
-        console.log(`Retrying attempt ${attempt + 1}/${maxRetries}...`);
       }
     } catch (error) {
-      console.log(error);
       if (attempt === maxRetries) throw error;
       await new Promise((resolve) => setTimeout(resolve, delay));
-      console.log(`Error in attempt ${attempt}, retrying...`);
     }
   }
   return null;
@@ -167,8 +164,6 @@ export const testInput = async (input, userId) => {
     const queryData = await executeWithRetry(async () => {
       return await generateQueryAndExecution(input, userId);
     });
-
-    console.log("Generated Query:", queryData);
 
     if (
       queryData.type === "general_response" ||
@@ -189,8 +184,6 @@ export const testInput = async (input, userId) => {
       queryData.schemaUsed,
       userId
     );
-
-    console.log("Database Result:", dbResult);
 
     if (dbResult === null || dbResult.length === 0) {
       const responses = {
@@ -219,7 +212,6 @@ export const testInput = async (input, userId) => {
       dbResult,
       queryData.queryType
     );
-    console.log("Response:", response);
     return {
       success: true,
       data: {

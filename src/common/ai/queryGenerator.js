@@ -2,34 +2,37 @@ export const rules = `
 Example QUERY GENERATION RULES:
 
 1. Syntax Rules:
-- ALWAYS start queries with 'await'
+- NEVER use 'await'
+- NEVER use 'async'
 - NEVER use 'const', 'let', or 'var' in queries
-- Use IIFE pattern for complex queries: "await (async () => { ... })()"
-- Return results directly without variable assignment
+- Do *not* use IIFE pattern (e.g., "await (async () => { ... })()")
+- Return the Mongoose query directly (e.g., 'ProductSchemaModel.find({ userId: userId })')
 
 2. Basic Rules Examples:
 - ALWAYS include userId filter in every query
 - Use case-insensitive regex for name searches: { $regex: searchTerm, $options: 'i' }
 - Return empty array [] instead of null for no results
-- Always use try-catch in async queries
 - Always use proper field names as defined in schema
 - While generating query for orders and purchases use products.productId while populate products schema
 - If any user ask a questions related to find orders/purchases for particular product,customer/supplier then only generate data related to that not generate any report , instead if user ask any questions related to reports then generate report for that particular question using relevant schema
 
 ✅ CORRECT:
-"await ProductSchemaModel.countDocuments({ userId: userId })"
-"await (async () => { return await ProductSchemaModel.find({ userId: userId }) })()"
+"ProductSchemaModel.countDocuments({ userId: userId })"
+"ProductSchemaModel.find({ userId: userId })"
 
 ❌ INCORRECT:
 "const count = await ProductSchemaModel.countDocuments({ userId: userId })"
 "let products = await ProductSchemaModel.find({ userId: userId })"
+"await ProductSchemaModel.countDocuments({ userId: userId })"  // No await
+"await (async () => { return await ProductSchemaModel.find({ userId: userId }) })()" // No await or IIFE
 
 2. Date Query Rules:
    • ALWAYS use proper date formatting in queries
    • For date ranges, use $gte (greater than or equal) and $lte (less than or equal)
    • Format input dates as 'YYYY-MM-DD' in MongoDB queries
    • Handle timezone differences by using start/end of day
-   • Include date validation in try-catch blocks; `;
+   • Include date validation in try-catch blocks (in the code that *executes* the query, not in the query string itself);
+`;
 
 export const statusValues = `
 - Order Status: ["pending", "completed", "cancelled"]
@@ -161,7 +164,7 @@ export const basicQueries = `
 1. Inventory Queries:
 {
   "type": "database_query",
-  "mongooseQuery": "await ProductSchemaModel.find({ userId: 'userId' }).select('productnm sellingPrice quantity');",
+  "mongooseQuery": "ProductSchemaModel.find({ userId: 'userId' }).select('productnm sellingPrice quantity');",
   "schemaUsed": "ProductSchemaModel",
   "queryType": "list"
 }
@@ -181,75 +184,74 @@ export const basicQueries = `
 }`;
 
 export const inventoryQueries = `
-This is only the example query,If user ask any inventory-related question, generate the query using aggregation, filters, sums, and all other relevant operations to provide the user with 100% accurate results.
+This is only the example query. If a user asks any inventory-related question, generate the query using aggregation, filters, sums, and all other relevant operations to provide the user with 100% accurate results.  Remember to replace placeholders like 'userId', 'Product Name', 'categoryName', etc., with the actual values.  Do not include 'await', 'async', or IIFEs in the generated query.  The query should be valid JSON inside the find() or findOne() parentheses.
 
 1. List all products:
 {
-  "mongooseQuery": "await ProductSchemaModel.find({ userId: 'userId', }).select('productnm sellingPrice quantity')",
+  "mongooseQuery": "ProductSchemaModel.find({ userId: 'userId' }).select('productnm sellingPrice quantity')",
   "schemaUsed": "ProductSchemaModel",
   "queryType": "list"
 }
 
 2. Find product by name:
 {
-  "mongooseQuery": "await ProductSchemaModel.findOne({ userId: 'userId', productnm: { $regex: 'Product Name', $options: 'i' } })",
+  "mongooseQuery": "ProductSchemaModel.findOne({ userId: 'userId', productnm: { $regex: 'Product Name', $options: 'i' } })",
   "schemaUsed": "ProductSchemaModel",
   "queryType": "detail"
 }
 
 3. Low stock products:
 {
-  "mongooseQuery": "await ProductSchemaModel.find({ userId: 'userId', quantity: { $lt: 50 } }).select('productnm quantity')",
+  "mongooseQuery": "ProductSchemaModel.find({ userId: 'userId', quantity: { $lt: 50 } }).select('productnm quantity')",
   "schemaUsed": "ProductSchemaModel",
   "queryType": "low stock"
 }
 
 4. Get count/total product quantity/stock:
 {
-  "mongooseQuery": "await ProductSchemaModel.findOne({userId: 'userId', productnm: { $regex: 'productnm', $options: 'i' } }).select('productnm quantity')",
+  "mongooseQuery": "ProductSchemaModel.findOne({ userId: 'userId', productnm: { $regex: 'productnm', $options: 'i' } }).select('productnm quantity')",
   "schemaUsed": "ProductSchemaModel",
   "queryType": "stock"
 }
 
-5.Find Orders by Product Name
+5. Find Orders by Product Name:
 {
-  "mongooseQuery": "await (async () => { const product = await ProductSchemaModel.findOne({ userId: userId, productnm: { $regex: productName, $options: 'i' } }); if (!product) return []; return await OrderSchemaModel.find({ userId: userId, 'products.productId': product._id }).populate('products.productId', 'productnm sellingPrice').populate('customerId', 'customernm email phone').select('customerId products quantity total order_status createdAt invoice_no'); })()",
+  "mongooseQuery": "async () => { const product = await ProductSchemaModel.findOne({ userId: userId, productnm: { $regex: productName, $options: 'i' } }); if (!product) return []; return await OrderSchemaModel.find({ userId: userId, 'products.productId': product._id }).populate('products.productId', 'productnm sellingPrice').populate('customerId', 'customernm email phone').select('customerId products quantity total order_status createdAt invoice_no'); }",
   "schemaUsed": ["ProductSchemaModel", "OrderSchemaModel"],
   "queryType": "list"
 }
 
-5.Find Purchase by Product Name
+6. Find Purchases by Product Name:
 {
-  "mongooseQuery": "await (async () => { const product = await ProductSchemaModel.findOne({ userId: userId, productnm: { $regex: productName, $options: 'i' } }); if (!product) return []; return await PurchaseSchemaModel.find({ userId: userId, 'products.productId': product._id }).populate('products.productId', 'productnm sellingPrice').populate('supplierId', 'suppliernm email phone').select('supplierId products quantity total status createdAt purchase_no'); })()",
+  "mongooseQuery": "async () => { const product = await ProductSchemaModel.findOne({ userId: userId, productnm: { $regex: productName, $options: 'i' } }); if (!product) return []; return await PurchaseSchemaModel.find({ userId: userId, 'products.productId': product._id }).populate('products.productId', 'productnm sellingPrice').populate('supplierId', 'suppliernm email phone').select('supplierId products quantity total status createdAt purchase_no'); }",
   "schemaUsed": ["ProductSchemaModel", "PurchaseSchemaModel"],
   "queryType": "list"
 }
 
-
-7.Find Purchases by Supplier Name:
+7. Find Purchases by Supplier Name:
 {
-  "mongooseQuery": "await (async () => { const supplier = await SupplierSchemaModel.findOne({ userId: userId, suppliernm: { $regex: supplierName, $options: 'i' } }); if (!supplier) return []; return await PurchaseSchemaModel.find({ userId: userId, supplierId: supplier._id }).populate('products.productId', 'productnm sellingPrice').populate('supplierId', 'suppliernm email phone').select('supplierId purchase_no date total status products'); })()",
+  "mongooseQuery": "async () => { const supplier = await SupplierSchemaModel.findOne({ userId: userId, suppliernm: { $regex: supplierName, $options: 'i' } }); if (!supplier) return []; return await PurchaseSchemaModel.find({ userId: userId, supplierId: supplier._id }).populate('products.productId', 'productnm sellingPrice').populate('supplierId', 'suppliernm email phone').select('supplierId purchase_no date total status products'); }",
   "schemaUsed": ["SupplierSchemaModel", "PurchaseSchemaModel"],
   "queryType": "list"
 }
 
-7. Find products by category:
+8. Find products by category:
 {
-  "mongooseQuery": "await ProductSchemaModel.find({ userId: 'userId', categoryName: { $regex: 'categoryName', $options: 'i' } })",
+  "mongooseQuery": "ProductSchemaModel.find({ userId: 'userId', categoryName: { $regex: 'categoryName', $options: 'i' } })",
   "schemaUsed": "ProductSchemaModel",
   "queryType": "list"
 }
 
-8. List of employee of inventory:
+9. List of employees:
 {
- "mongooseQuery": "await EmployeeSchemaModel.find({userId: 'userId'}).select('name email phone')",
+  "mongooseQuery": "EmployeeSchemaModel.find({ userId: 'userId' }).select('name email phone')",
   "schemaUsed": "EmployeeSchemaModel",
   "queryType": "list"
 }
 
-9. List of subscription of inventory:
+10. List of subscriptions:
 {
- "mongooseQuery": "await SubscriptionSchemaModel.find({}).select('title noOfDays amount')",
+  "mongooseQuery": "SubscriptionSchemaModel.find({}).select('title noOfDays amount')", // userId might be needed here too
   "schemaUsed": "SubscriptionSchemaModel",
   "queryType": "list"
 }
