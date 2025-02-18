@@ -1,4 +1,15 @@
-import { save , login , update , deleteById , fetch , fetchById , changePasswordService } from "../services/user.js";
+import {
+  save,
+  login,
+  update,
+  deleteById,
+  fetch,
+  fetchById,
+  changePasswordService,
+  updateStatus,
+  countCompany,
+  getAiresponse,
+} from "../services/user.js";
 import { messages, statusCodes } from "../common/constant.js";
 
 export const create = async (req, res) => {
@@ -22,22 +33,24 @@ export const fetchUser = async (req, res) => {
 };
 
 export const fetchById_User = async (req, res) => {
-    try {
-      const id = req.params.id;
-      const user = await fetchById(id); 
-  
-      if (!user) {
-        return res.status(statusCodes.notFound).json({ message: messages.data_not_found});
-      }
-  
-      return res.status(statusCodes.ok).json(user); 
-    } catch (error) {
-      return res.status(statusCodes.internalServerError).json({ message: error.message });
+  try {
+    const id = req?.params?.id;
+    const user = await fetchById(id);
+    if (!user) {
+      return res
+        .status(statusCodes.notFound)
+        .json({ message: messages.data_not_found });
     }
-  };
+    return res.status(statusCodes.ok).json(user);
+  } catch (error) {
+    return res
+      .status(statusCodes.internalServerError)
+      .json({ message: error.message });
+  }
+};
 
 export const loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password } = req?.body;
   const result = await login(email, password);
   if (result.success) {
     return res
@@ -51,54 +64,126 @@ export const loginUser = async (req, res) => {
 };
 
 export const updateUser = async (req, res) => {
-  const id  = req.params.id; 
+  const id = req?.params?.id;
   if (!id) {
-    return res.status(statusCodes.badRequest).json({ message:messages.required });
+    return res
+      .status(statusCodes.badRequest)
+      .json({ message: messages.required });
   }
-  const updateData = req.body; 
+  const updateData = req?.body;
   try {
     const updatedUser = await update(id, updateData);
     if (!updatedUser) {
-      return res.status(statusCodes.notFound).json({ message: messages.not_found });
+      return res
+        .status(statusCodes.notFound)
+        .json({ message: messages.not_found });
     }
     return res.status(statusCodes.ok).json(updatedUser);
   } catch (error) {
-    return res.status(statusCodes.internalServerError).json({ 
-      message : messages.fetching_failed
+    return res.status(statusCodes.internalServerError).json({
+      message: messages.data_update_error,
     });
   }
 };
 
 export const deleteUser = async (req, res) => {
-  const id = req.params.id;
+  const id = req?.params?.id;
   if (!id) {
-    return res.status(statusCodes.badRequest).json({ message: messages.required });
+    return res
+      .status(statusCodes.badRequest)
+      .json({ message: messages.required });
   }
   try {
     await deleteById(id);
-    res.status(statusCodes.ok).json({ message: messages.data_deletion_success });
+    res
+      .status(statusCodes.ok)
+      .json({ message: messages.data_deletion_success });
   } catch (error) {
     if (error.message === messages.not_found) {
-      return res.status(statusCodes.notFound).json({ message: messages.data_not_found });
+      return res
+        .status(statusCodes.notFound)
+        .json({ message: messages.data_not_found });
     }
-    res.status(statusCodes.internalServerError).json({ 
-      message: messages.data_deletion_error
+    res.status(statusCodes.internalServerError).json({
+      message: messages.data_deletion_error,
     });
   }
 };
 
 export const changePassword = async (req, res) => {
   try {
-    const { currentPassword, newPassword } = req.body;
-    const userId = req.user._id;
-    const result = await changePasswordService(userId, currentPassword, newPassword);
+    const { currentPassword, newPassword } = req?.body;
+    const userId = req?.user?._id;
+    const result = await changePasswordService(
+      userId,
+      currentPassword,
+      newPassword
+    );
 
     if (result.success) {
-      return res.status(statusCodes.ok).json({ success: true, message: result.message });
+      return res
+        .status(statusCodes.ok)
+        .json({ success: true, message: result.message });
     } else {
-      return res.status(statusCodes.notFound).json({ success: false, message: result.message });
+      return res
+        .status(statusCodes.notFound)
+        .json({ success: false, message: result.message });
     }
   } catch (error) {
-    return res.status(statusCodes.internalServerError).json({ success: false, message: messages.server_error });
+    return res
+      .status(statusCodes.internalServerError)
+      .json({ success: false, message: messages.server_error });
+  }
+};
+
+export const changeCompanyStatus = async (req, res) => {
+  const { id } = req?.params;
+  const { isActive } = req?.body;
+  try {
+    const updatedUser = await updateStatus(id, isActive);
+    if (!updatedUser) {
+      return res.status(statusCodes.notFound).json({
+        message: messages.not_found,
+      });
+    }
+    return res
+      .status(statusCodes.ok)
+      .json({ success: true, data: updatedUser });
+  } catch (error) {
+    return res.status(statusCodes.internalServerError).json({
+      message: messages.fetching_failed,
+    });
+  }
+};
+
+export const getCompanyCount = async (req, res) => {
+  try {
+    const companyCount = await countCompany();
+    res.status(statusCodes.ok).json({
+      success: true,
+      message: messages.fetching_success,
+      count: companyCount,
+    });
+  } catch (error) {
+    res.status(statusCodes.internalServerError).json({
+      success: false,
+      message: messages.fetching_failed,
+    });
+  }
+};
+
+export const getAiReportData = async (req, res) => {
+  try {
+    const result = await getAiresponse(req);
+    res.status(statusCodes.ok).json({
+      success: true,
+      data: result.data,
+      message: result.data.response
+    });
+  } catch (error) {
+    res.status(statusCodes.internalServerError).json({
+      success: false,
+      message: messages.fetching_failed,
+    });
   }
 };

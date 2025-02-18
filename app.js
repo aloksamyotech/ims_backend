@@ -11,27 +11,36 @@ import customerRouter from "./src/routes/customer.js";
 import productRouter from "./src/routes/product.js";
 import orderRouter from "./src/routes/orders.js";
 import purchaseRouter from "./src/routes/purchase.js";
-import multer from "multer";
+import adminRouter from "./src/routes/master.js";
+import subscriptionRouter from "./src/routes/subscription.js";
+import employeeRouter from './src/routes/employee.js';
+import empPermissionRouter from "./src/routes/empPermissions.js";
+
+import customCron from "./src/common/cron.js";
+
 
 const app = express();
-
-app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static( 'uploads'));
-
-app.use("/category", categoryRouter);
-app.use("/unit", unitRouter);
-app.use("/user", userRouter);
-app.use("/supplier", supplierRouter);
-app.use("/customer", customerRouter);
-app.use("/product", productRouter);  
-app.use("/order", orderRouter);
-app.use("/purchase", purchaseRouter);
+app.use("/api/uploads", express.static( 'uploads'));
+app.use("/api/category", categoryRouter);
+app.use("/api/unit", unitRouter);
+app.use("/api/user", userRouter);
+app.use("/api/supplier", supplierRouter);
+app.use("/api/customer", customerRouter);
+app.use("/api/product", productRouter);  
+app.use("/api/order", orderRouter);
+app.use("/api/purchase", purchaseRouter);
+app.use("/api/admin", adminRouter);
+app.use("/api/subscription", subscriptionRouter);
+app.use("/api/employee", employeeRouter);
+app.use("/api/permissions" , empPermissionRouter);
 
 connectDb();
 const port = process.env.PORT;
 app.listen(port, () => {
   console.log("Server is listening on port :", port);
 });
+
+customCron.sendEmailAllUser();

@@ -1,4 +1,4 @@
-import { save, fetch, update, deleteById } from '../services/supplier.js';
+import { save, fetch, update, deleteById , fetchById, countSupplier} from '../services/supplier.js';
 import { statusCodes, messages } from '../common/constant.js';
 
 export const create = async (req, res) => {
@@ -29,11 +29,11 @@ export const fetch_supplier = async (req, res) => {
 };
 
 export const updateSupplier = async (req, res) => {
-  const id  = req.params.id; 
+  const id  = req?.params?.id; 
   if (!id) {
     return res.status(statusCodes.badRequest).json({ message: messages.required });
   }
-  const updateData = req.body; 
+  const updateData = req?.body; 
   try {
     const updatedSupplier = await update(id, updateData);
     if (!updatedSupplier) {
@@ -48,8 +48,22 @@ export const updateSupplier = async (req, res) => {
   }
 };
 
+export const fetchById_supplier = async (req, res) => {
+  try {
+    const id = req?.params?.id;
+    const supplier = await fetchById(id); 
+    if (!supplier) {
+      return res.status(statusCodes.notFound).json({ message:messages.data_not_found });
+    }
+
+    return res.status(statusCodes.ok).json(supplier); 
+  } catch (error) {
+    return res.status(statusCodes.internalServerError).json({ message: messages.fetching_failed, error: error.message }); 
+  }
+};
+
 export const deleteSupplier = async (req, res) => {
-  const id = req.params.id;
+  const id = req?.params?.id;
   if (!id) {
     return res.status(statusCodes.badRequest).json({ message: messages.required });
   }
@@ -67,3 +81,28 @@ export const deleteSupplier = async (req, res) => {
     });
   }
 };
+
+export const getSupplierCount = async (req, res) => {
+  try {
+    const supplierCount = await countSupplier(req);
+       if (supplierCount === 0) {
+         return res.status(statusCodes.ok).json({
+           success: true,
+           message: messages.data_not_found,
+           count: 0,
+         });
+       }
+   
+       res.status(statusCodes.ok).json({
+         success: true,
+         message: messages.fetching_success,
+         count: supplierCount,
+       });
+     } catch (error) {
+       res.status(statusCodes.internalServerError).json({
+         success: false,
+         message: messages.fetching_failed,
+       });
+     }
+   };
+

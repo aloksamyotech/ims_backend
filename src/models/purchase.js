@@ -3,6 +3,7 @@ import uniqueValidator from "mongoose-unique-validator";
 import { tableNames } from "../common/constant.js";
 import ProductSchemaModel from "./products.js";
 import SupplierSchemaModel from "./supplier.js";
+import UserSchemaModel from "./user.js";
 
 const ProductOrderSchema = new mongoose.Schema({
   productId: {
@@ -30,6 +31,11 @@ const ProductOrderSchema = new mongoose.Schema({
 
 const PurchaseSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: tableNames.users,
+      required: true,
+    },
     supplierId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: tableNames.supplier,
@@ -57,8 +63,8 @@ const PurchaseSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Pending", "Completed"],
-      default: "Pending",
+      enum: ["pending", "completed" , "cancelled"],
+      default: "pending",
     },
     total: {
       type: Number,
@@ -72,6 +78,7 @@ const PurchaseSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    isDeleted: { type: Boolean, default: false },
     products: [ProductOrderSchema],
   },
   { timestamps: true }
@@ -114,6 +121,14 @@ const generatePurchaseNumber = async () => {
           this.supplierEmail = supplier ? supplier.email : null;
           this.supplierPhone = supplier ? supplier.phone : null;
         }
+
+        if (this.userId) {
+          const user = await UserSchemaModel.findById(this.userId);
+          if (!user) {
+            return next(new Error("User not found"));
+          }
+          this.userId = user?._id;
+        }    
 
         next();
       } catch (error) {
