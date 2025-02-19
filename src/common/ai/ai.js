@@ -15,7 +15,7 @@ import {
   emptyResponse,
   commonResponse,
 } from "./responseFormat.js";
-
+import mongoose from "mongoose";
 dotenv.config();
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -49,7 +49,6 @@ Example format:
       ) {
         return parsedResponse;
       }
-
       return parsedResponse;
     } catch (error) {
       throw new Error(`Invalid query generation response: ${error.message}`);
@@ -102,25 +101,11 @@ const executeMongooseQuery = async (queryString, schemaUsed, userId) => {
   };
 
   try {
-    let modifiedQuery = queryString.replace(
-      /userId: userId/g,
-      `userId: '${userId}'`
-    );
-
-    if (!modifiedQuery.includes("userId:")) {
-      modifiedQuery = modifiedQuery.replace(
-        /find\({/,
-        `find({ userId: '${userId}',`
-      );
-      modifiedQuery = modifiedQuery.replace(
-        /findOne\({/,
-        `findOne({ userId: '${userId}',`
-      );
-    }
+ 
     const wrappedQuery = `
       return (async () => {
         try {
-          const result = ${modifiedQuery}
+          const result = ${queryString};
           if (!result || result.length === 0) {
             throw new Error("No data found.");
           }
@@ -132,13 +117,14 @@ const executeMongooseQuery = async (queryString, schemaUsed, userId) => {
       })();
     `;
 
-    const executeQuery = new Function(...Object.keys(schemaMap), wrappedQuery);
+    const executeQuery = new Function(...Object.keys(schemaMap), "mongoose", wrappedQuery);
 
-    return await executeQuery(...Object.values(schemaMap));
+    return await executeQuery(...Object.values(schemaMap), mongoose);
   } catch (error) {
     throw new Error(`Query execution failed: ${error.message}`);
   }
 };
+
 
 const executeWithRetry = async (func, maxRetries = 3, delay = 500) => {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
