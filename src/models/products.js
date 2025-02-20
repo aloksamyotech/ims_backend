@@ -40,9 +40,9 @@ const ProductSchema = new mongoose.Schema(
       default: 0,
     },
     quantityAlert: {
-       type: Number,
-       required: true,
-       default : 30,
+      type: Number,
+      required: true,
+      default: 30,
     },
     product_no: {
       type: String,
@@ -75,7 +75,7 @@ const ProductSchema = new mongoose.Schema(
     },
     isDeleted: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 ProductSchema.plugin(uniqueValidator);

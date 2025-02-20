@@ -20,7 +20,7 @@ const generateInvoicePDF = async (orderData) => {
   const filePath = path.join(
     __dirname,
     "../uploads/invoices",
-    `invoice-${orderData._id}.pdf`
+    `invoice-${orderData._id}.pdf`,
   );
 
   doc.pipe(fs.createWriteStream(filePath));
@@ -73,7 +73,7 @@ const generateInvoicePDF = async (orderData) => {
       margin: 20,
       padding: 5,
       width: 500,
-    }
+    },
   );
 
   doc.moveDown(1);
@@ -110,7 +110,7 @@ export const save = async (req) => {
       tax,
       customerId,
       userId,
-    } = req?.body;
+    } = req?.body || {};
 
     const customer = await CustomerSchemaModel.findById(customerId);
     if (!customer) {
@@ -169,7 +169,7 @@ export const save = async (req) => {
 
 export const fetch = async (req) => {
   try {
-    const { userId } = req?.query;
+    const { userId } = req?.query || {};
     const condition_obj = { isDeleted: false };
 
     if (userId) {
@@ -358,7 +358,7 @@ export const handleOrderStatus = async (id, action) => {
 
 export const countOrders = async (req) => {
   try {
-    const { userId, fromDate, toDate } = req?.query;
+    const { userId, fromDate, toDate } = req?.query || {};
 
     if (!userId) {
       throw new Error("userId is required");
@@ -389,7 +389,7 @@ export const countOrders = async (req) => {
 
 export const getTotalSalesForMonth = async (req) => {
   try {
-    const { userId, year } = req?.query;
+    const { userId, year } = req?.query || {};
     const condition_obj = { isDeleted: false };
 
     if (userId) {
@@ -445,7 +445,7 @@ export const getTotalSalesForMonth = async (req) => {
 
 export const getTotalSalesForDateRange = async (req) => {
   try {
-    const { userId, fromDate, toDate } = req?.query;
+    const { userId, fromDate, toDate } = req?.query || {};
 
     if (!fromDate || !toDate) {
       throw new Error("Both fromDate and toDate are required.");
@@ -484,14 +484,14 @@ export const getTotalSalesForDateRange = async (req) => {
     ]);
 
     return totalSales.length > 0 ? totalSales[0].total_sales_amount : 0;
-  } catch (error) {
+  } catch {
     throw new Error(messages.data_not_found);
   }
 };
 
 export const getTotalQuantityForMonth = async (req) => {
   try {
-    const { userId, year } = req?.query;
+    const { userId, year } = req?.query || {};
     const condition_obj = { isDeleted: false };
 
     if (userId) {
@@ -543,14 +543,14 @@ export const getTotalQuantityForMonth = async (req) => {
     });
 
     return formattedData;
-  } catch (error) {
+  } catch {
     throw new Error(messages.data_not_found);
   }
 };
 
 export const getTotalQuantityForDateRange = async (req) => {
   try {
-    const { userId, fromDate, toDate } = req?.query;
+    const { userId, fromDate, toDate } = req?.query || {};
 
     if (!fromDate || !toDate) {
       throw new Error("Both fromDate and toDate are required.");
@@ -591,14 +591,14 @@ export const getTotalQuantityForDateRange = async (req) => {
     ]);
 
     return totalQuantity.length > 0 ? totalQuantity[0].totalQuantitySold : 0;
-  } catch (error) {
+  } catch {
     throw new Error(messages.data_not_found);
   }
 };
 
 export const getCategoryForMonth = async (req) => {
   try {
-    const { userId, fromDate, toDate } = req?.query;
+    const { userId, fromDate, toDate } = req?.query || {};
 
     const condition_obj = { isDeleted: false, order_status: "completed" };
 
@@ -634,7 +634,7 @@ export const getCategoryForMonth = async (req) => {
     ]);
 
     return topCategories;
-  } catch (error) {
+  } catch {
     throw new Error(messages.data_not_found);
   }
 };
@@ -689,14 +689,14 @@ export const getProfitAndSalesForAllProducts = async (userId) => {
     });
 
     return allProductData;
-  } catch (error) {
+  } catch {
     throw new Error(messages.data_not_found);
   }
 };
 
 export const getTotalSalesForEachCompany = async (req) => {
   try {
-    const { userId } = req?.query;
+    const { userId } = req?.query || {};
     const condition_obj = { isDeleted: false };
 
     if (userId) {
@@ -738,7 +738,7 @@ export const getTotalSalesForEachCompany = async (req) => {
     ]);
 
     return totalSalesPerCompany;
-  } catch (error) {
+  } catch {
     throw new Error(messages.data_not_found);
   }
 };

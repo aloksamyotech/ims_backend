@@ -21,7 +21,7 @@ const UnitSchema = new mongoose.Schema(
     },
     isDeleted: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 UnitSchema.plugin(uniqueValidator);

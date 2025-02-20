@@ -4,7 +4,7 @@ import url from "url";
 
 export const save = async (req) => {
   try {
-    const { unitnm, shortcode } = req?.body;
+    const { unitnm, shortcode } = req?.body || {};
     const unitModel = UnitSchemaModel({
       unitnm,
       shortcode,
@@ -30,7 +30,7 @@ export const update = async (id, updateData) => {
     const updatedUnit = await UnitSchemaModel.findByIdAndUpdate(
       id,
       updateData,
-      { new: true }
+      { new: true },
     );
     return updatedUnit;
   } catch (error) {

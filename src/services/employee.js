@@ -5,7 +5,7 @@ import UserSchemaModel from "../models/user.js";
 
 export const save = async (req) => {
   try {
-    const { name, email, password, phone, address, userId } = req?.body;
+    const { name, email, password, phone, address, userId } = req?.body || {};
 
     const user = await UserSchemaModel.findById(userId);
     if (!user) {
@@ -40,7 +40,7 @@ export const save = async (req) => {
 
 export const fetch = async (req) => {
   try {
-    const { userId } = req?.query;
+    const { userId } = req?.query || {};
     const condition_obj = { isDeleted: false };
 
     if (userId) {
@@ -51,7 +51,7 @@ export const fetch = async (req) => {
       createdAt: -1,
     });
     return employeeList;
-  } catch (error) {
+  } catch {
     throw new Error(messages.fetching_failed);
   }
 };
@@ -59,7 +59,7 @@ export const fetch = async (req) => {
 export const fetchById = async (id) => {
   try {
     return await EmployeeSchemaModel.findById(id);
-  } catch (error) {
+  } catch {
     throw new Error(messages.fetching_failed);
   }
 };
@@ -69,13 +69,13 @@ export const update = async (id, updateData) => {
     const updatedEmployee = await EmployeeSchemaModel.findByIdAndUpdate(
       id,
       updateData,
-      { new: true }
+      { new: true },
     );
     if (!updatedEmployee || updatedEmployee.isDeleted) {
       throw new Error(messages.data_not_found);
     }
     return updatedEmployee;
-  } catch (error) {
+  } catch {
     throw new Error(messages.data_update_error);
   }
 };
@@ -91,7 +91,7 @@ export const deleteById = async (id) => {
 
 export const countEmployee = async (req) => {
   try {
-    const { userId } = req?.query;
+    const { userId } = req?.query || {};
     if (!userId) {
       throw new Error("userId is required");
     }
@@ -106,7 +106,7 @@ export const countEmployee = async (req) => {
     }
 
     return employeeCount.length;
-  } catch (error) {
+  } catch {
     throw new Error(messages.data_not_found);
   }
 };

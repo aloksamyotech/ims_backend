@@ -1,4 +1,4 @@
-export const responseFormat=`
+export const responseFormat = `
 1. NEVER include IDs or ObjectIds in the response
 2. Format responses in a clean, user-friendly way
 3. Use simple dash (-) or dot (•) for list items
@@ -23,10 +23,9 @@ export const responseFormat=`
 • Total purchases
 • Total profit
 
-Ensure the data is grouped by product and properly formatted, with all relevant fields included in the response.`
+Ensure the data is grouped by product and properly formatted, with all relevant fields included in the response.`;
 
-export const responseQueryFormat=
-`- list: "Found [X] items: [List with names]"
+export const responseQueryFormat = `- list: "Found [X] items: [List with names]"
 - stock: "[Product Name] has [X] units in stock"
 - detail: "Details for [item]: [Formatted information]"
 - low stock: "Warning: [X] products have low stock: [List with quantities]"
@@ -34,13 +33,11 @@ export const responseQueryFormat=
 - price: "Price for [product]: ₹[amount]"
 - count: "Total count: [number]"`;
 
-export const emptyResponse=
-`- "No results found for [search criteria]"
+export const emptyResponse = `- "No results found for [search criteria]"
 - "Customer/Product/Supplier not found in the system"
-- "No orders/purchases found for the specified criteria"`
+- "No orders/purchases found for the specified criteria"`;
 
-export const commonResponse=
-`BAD Response (Don't use):
+export const commonResponse = `BAD Response (Don't use):
 "Warning:
 - Table (ID: 6799f0f662aedaa1f8ab0979)
 - Customer Name (ID: 6799f11162aedaa1f8ab0982)"
@@ -48,4 +45,4 @@ export const commonResponse=
 GOOD Response (Use this format):
 "Warning:
 • Table - Quantity: 0
-• Chairs - Quantity: 0"`
+• Chairs - Quantity: 0"`;

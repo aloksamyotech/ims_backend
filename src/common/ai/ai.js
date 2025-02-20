@@ -15,6 +15,7 @@ import {
   emptyResponse,
   commonResponse,
 } from "./responseFormat.js";
+import process from "process";
 import mongoose from "mongoose";
 dotenv.config();
 
@@ -168,7 +169,7 @@ export const testInput = async (input, userId) => {
     const dbResult = await executeMongooseQuery(
       queryData.mongooseQuery,
       queryData.schemaUsed,
-      userId
+      userId,
     );
 
     if (dbResult === null || dbResult.length === 0) {
@@ -196,7 +197,7 @@ export const testInput = async (input, userId) => {
     const response = await generateResponse(
       input,
       dbResult,
-      queryData.queryType
+      queryData.queryType,
     );
     return {
       success: true,

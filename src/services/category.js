@@ -1,10 +1,9 @@
-import mongoose from "mongoose";
 import { messages } from "../common/constant.js";
 import CategorySchemaModel from "../models/category.js";
 import UserSchemaModel from "../models/user.js";
 
 export const save = async (req) => {
-  const { catnm, desc, userId } = req?.body; 
+  const { catnm, desc, userId } = req?.body || {};
   const user = await UserSchemaModel.findById(userId);
 
   if (!user) {
@@ -15,7 +14,7 @@ export const save = async (req) => {
     const existingCategory = await CategorySchemaModel.findOne({
       catnm,
       userId,
-      isDeleted: false
+      isDeleted: false,
     });
 
     if (existingCategory) {
@@ -35,14 +34,16 @@ export const save = async (req) => {
 
 export const fetch = async (req) => {
   try {
-    const { userId } = req?.query; 
+    const { userId } = req?.query || {};
     const condition_obj = { isDeleted: false };
 
     if (userId) {
-      condition_obj.userId = userId; 
+      condition_obj.userId = userId;
     }
 
-    return await CategorySchemaModel.find(condition_obj).sort({ createdAt: -1 });
+    return await CategorySchemaModel.find(condition_obj).sort({
+      createdAt: -1,
+    });
   } catch (error) {
     return error;
   }
@@ -53,7 +54,7 @@ export const update = async (id, updateData) => {
     const updatedCategory = await CategorySchemaModel.findByIdAndUpdate(
       id,
       updateData,
-      { new: true }
+      { new: true },
     );
     return updatedCategory;
   } catch (error) {

@@ -9,6 +9,7 @@ import { fileURLToPath } from "url";
 import path from "path";
 import fs from "fs";
 import moment from "moment";
+import process from "process";
 
 dotenv.config();
 
@@ -102,7 +103,7 @@ const sendEmailAllUser = () => {
               const productDetails = order.products
                 .map(
                   (product) =>
-                    `${product.productName} (Qty: ${product.quantity}, Price: ${product.price})`
+                    `${product.productName} (Qty: ${product.quantity}, Price: ${product.price})`,
                 )
                 .join(", ");
 
@@ -136,7 +137,7 @@ const sendEmailAllUser = () => {
               const productDetails = purchase.products
                 .map(
                   (product) =>
-                    `${product.productName} (Qty: ${product.quantity}, Price: ${product.price})`
+                    `${product.productName} (Qty: ${product.quantity}, Price: ${product.price})`,
                 )
                 .join(", ");
 
@@ -155,7 +156,7 @@ const sendEmailAllUser = () => {
             writeStream.on("finish", resolve);
             writeStream.on("error", reject);
           });
-       
+
           const mailOptions = {
             from: process.env.EMAIL_USER,
             to: user.email,

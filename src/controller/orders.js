@@ -1,5 +1,18 @@
-import { save , fetch , deleteById , fetchById, handleOrderStatus , countOrders,getCategoryForMonth,getTotalQuantityForDateRange,
-   getTotalSalesForMonth ,getTotalSalesForDateRange, getTotalQuantityForMonth , getProfitAndSalesForAllProducts, getTotalSalesForEachCompany} from "../services/orders.js";
+import {
+  save,
+  fetch,
+  deleteById,
+  fetchById,
+  handleOrderStatus,
+  countOrders,
+  getCategoryForMonth,
+  getTotalQuantityForDateRange,
+  getTotalSalesForMonth,
+  getTotalSalesForDateRange,
+  getTotalQuantityForMonth,
+  getProfitAndSalesForAllProducts,
+  getTotalSalesForEachCompany,
+} from "../services/orders.js";
 import { fetchCustomerProductReport } from "../services/reports.js";
 import { statusCodes, messages } from "../common/constant.js";
 
@@ -19,9 +32,9 @@ export const fetch_order = async (req, res) => {
     if (orderResponse.length !== 0) {
       res.status(statusCodes.ok).json(orderResponse);
     }
-  } catch (error) {
+  } catch {
     res.status(statusCodes.internalServerError).json({
-     message : messages.fetching_failed
+      message: messages.fetching_failed,
     });
   }
 };
@@ -29,44 +42,52 @@ export const fetch_order = async (req, res) => {
 export const fetchById_order = async (req, res) => {
   const id = req?.params?.id;
   try {
-    const orderResponse = await fetchById(id); 
+    const orderResponse = await fetchById(id);
     if (!orderResponse) {
-      return res.status(statusCodes.notFound).json({ message: messages.data_not_found });
+      return res
+        .status(statusCodes.notFound)
+        .json({ message: messages.data_not_found });
     }
     res.status(statusCodes.ok).json(orderResponse);
-  } catch (error) {
+  } catch {
     res.status(statusCodes.internalServerError).json({
-      message :messages.fetching_failed
+      message: messages.fetching_failed,
     });
   }
 };
 
-
 export const deleteOrder = async (req, res) => {
   const id = req?.params?.id;
   if (!id) {
-    return res.status(statusCodes.badRequest).json({ message: messages.required });
+    return res
+      .status(statusCodes.badRequest)
+      .json({ message: messages.required });
   }
   try {
     await deleteById(id);
-    res .status(statusCodes.ok) .json({ message: messages.data_deletion_success });
+    res
+      .status(statusCodes.ok)
+      .json({ message: messages.data_deletion_success });
   } catch (error) {
     if (error.message === messages.not_found) {
-      return res .status(statusCodes.notFound) .json({ message: messages.data_not_found });
+      return res
+        .status(statusCodes.notFound)
+        .json({ message: messages.data_not_found });
     }
-    res.status(statusCodes.internalServerError).json({message: messages.bad_request
-    });
+    res
+      .status(statusCodes.internalServerError)
+      .json({ message: messages.bad_request });
   }
 };
 
 export const getCustomerProductReport = async (req, res) => {
   try {
     const reportResponse = await fetchCustomerProductReport(req);
-      res.status(statusCodes.ok).json(reportResponse);
+    res.status(statusCodes.ok).json(reportResponse);
   } catch (error) {
     console.error(error);
     res.status(statusCodes.internalServerError).json({
-      message : messages.fetching_failed
+      message: messages.fetching_failed,
     });
   }
 };
@@ -74,14 +95,16 @@ export const getCustomerProductReport = async (req, res) => {
 export const updateOrderStatus = async (req, res) => {
   try {
     const id = req?.params?.id;
-    const action  = req?.body?.action; 
-    const updatedOrder = await handleOrderStatus(id, action); 
+    const action = req?.body?.action;
+    const updatedOrder = await handleOrderStatus(id, action);
     return res.status(statusCodes.ok).json({
       message: messages.data_update_success,
       order: updatedOrder,
     });
   } catch (error) {
-    return res.status(statusCodes.internalServerError).json({ message: error.message });
+    return res
+      .status(statusCodes.internalServerError)
+      .json({ message: error.message });
   }
 };
 
@@ -100,7 +123,7 @@ export const getOrderCount = async (req, res) => {
       message: messages.fetching_success,
       count: orderCount,
     });
-  } catch (error) {
+  } catch {
     res.status(statusCodes.internalServerError).json({
       success: false,
       message: messages.fetching_failed,
@@ -108,25 +131,24 @@ export const getOrderCount = async (req, res) => {
   }
 };
 
-
 export const getTotalSales = async (req, res) => {
   try {
     const salesData = await getTotalSalesForMonth(req);
     res.status(statusCodes.ok).json({
       success: true,
-      data: salesData
+      data: salesData,
     });
-  } catch (error) {
+  } catch {
     res.status(500).json({
       success: false,
-      message: messages.internalServerError
+      message: messages.internalServerError,
     });
   }
 };
 
 export const getSalesForDate = async (req, res) => {
   try {
-    const { fromDate, toDate } = req?.query;
+    const { fromDate, toDate } = req?.query || {};
 
     if (!fromDate || !toDate) {
       return res.status(statusCodes.badRequest).json({
@@ -155,19 +177,19 @@ export const getTotalQuantity = async (req, res) => {
     const salesData = await getTotalQuantityForMonth(req);
     res.status(statusCodes.ok).json({
       success: true,
-      data: salesData
+      data: salesData,
     });
-  } catch (error) {
+  } catch {
     res.status(statusCodes.internalServerError).json({
       success: false,
-      message: messages.internalServerError
+      message: messages.internalServerError,
     });
   }
 };
 
 export const getQuantityForDate = async (req, res) => {
   try {
-    const { fromDate, toDate } = req?.query;
+    const { fromDate, toDate } = req?.query || {};
 
     if (!fromDate || !toDate) {
       return res.status(statusCodes.badRequest).json({
@@ -191,10 +213,9 @@ export const getQuantityForDate = async (req, res) => {
   }
 };
 
-
 export const getTotalCategory = async (req, res) => {
   try {
-    const { fromDate, toDate } = req?.query;
+    const { fromDate, toDate } = req?.query || {};
 
     if (!fromDate || !toDate) {
       return res.status(statusCodes.badRequest).json({
@@ -202,38 +223,38 @@ export const getTotalCategory = async (req, res) => {
         message: "Both fromDate and toDate are required.",
       });
     }
-    
+
     const salesData = await getCategoryForMonth(req);
     res.status(statusCodes.ok).json({
       success: true,
-      data: salesData
+      data: salesData,
     });
-  } catch (error) {
+  } catch {
     res.status(statusCodes.internalServerError).json({
       success: false,
-      message: messages.internalServerError
+      message: messages.internalServerError,
     });
   }
 };
 export const getOrderAmount = async (req, res) => {
   try {
-    const userId = req?.query?.userId; 
+    const userId = req?.query?.userId;
 
     if (!userId) {
       return res.status(statusCodes.badRequest).json({
         success: false,
-        message: messages.required
+        message: messages.required,
       });
     }
     const profit = await getProfitAndSalesForAllProducts(userId);
     res.status(statusCodes.ok).json({
       success: true,
-      data: profit
+      data: profit,
     });
-  } catch (error) {
+  } catch {
     res.status(statusCodes.internalServerError).json({
       success: false,
-      message: messages.internalServerError
+      message: messages.internalServerError,
     });
   }
 };
@@ -242,7 +263,9 @@ export const getCompanyTotalSales = async (req, res) => {
   try {
     const totalSalesData = await getTotalSalesForEachCompany(req);
     if (totalSalesData.length === 0) {
-      return res.status(statusCodes.notFound).json({ message: "No sales data found for any company." });
+      return res
+        .status(statusCodes.notFound)
+        .json({ message: "No sales data found for any company." });
     }
 
     return res.status(statusCodes.ok).json({
@@ -258,4 +281,3 @@ export const getCompanyTotalSales = async (req, res) => {
     });
   }
 };
-

@@ -30,7 +30,7 @@ export const tableNames = {
   admin: "admin",
   subscription: "subscription",
   employee: "employee",
-  empPermissions : "empPermissions",
+  empPermissions: "empPermissions",
 };
 
 export const messages = {
@@ -50,13 +50,14 @@ export const messages = {
   server_error: "An unexpected error occurred. Please try again later.",
   bad_request: "The request could not be understood by the server.",
   unauthorized_access: "You do not have permission to access this resource.",
-  fetching_failed : "Failed to fetch data",
-  fetching_success : "Successfully fetch data",
-  required : "This is required.",
+  fetching_failed: "Failed to fetch data",
+  fetching_success: "Successfully fetch data",
+  required: "This is required.",
   not_available: "Data not available",
   invalid_format: "Invalid data format",
-  account_inactive: "Your account is inactive. Please contact the administrator.",
-  already_exist: 'Already exist',
+  account_inactive:
+    "Your account is inactive. Please contact the administrator.",
+  already_exist: "Already exist",
 };
 
-export const image_url = {  url :"https://ims.samyotech.in/api/" , };
+export const image_url = { url: "https://ims.samyotech.in/api/" };

@@ -24,7 +24,7 @@ const CategorySchema = new mongoose.Schema(
     },
     isDeleted: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 CategorySchema.pre("save", async function (next) {
@@ -53,6 +53,9 @@ CategorySchema.pre("save", async function (next) {
   }
 });
 
-const CategorySchemaModel = mongoose.model(tableNames.pcategory, CategorySchema);
+const CategorySchemaModel = mongoose.model(
+  tableNames.pcategory,
+  CategorySchema,
+);
 
 export default CategorySchemaModel;

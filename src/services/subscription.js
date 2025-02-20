@@ -3,7 +3,7 @@ import SubscriptionSchemaModel from "../models/subscription.js";
 
 export const save = async (req) => {
   try {
-    const { title, desc, amount, discount, noOfDays } = req?.body;
+    const { title, desc, amount, discount, noOfDays } = req?.body || {};
 
     const existingTitle = await SubscriptionSchemaModel.findOne({
       title,
@@ -43,7 +43,7 @@ export const fetch = async (req) => {
 export const fetchById = async (id) => {
   try {
     return await SubscriptionSchemaModel.findById(id);
-  } catch (error) {
+  } catch {
     throw new Error(messages.fetching_failed);
   }
 };
@@ -53,7 +53,7 @@ export const update = async (id, updateData) => {
     const updatedSubscription = await SubscriptionSchemaModel.findByIdAndUpdate(
       id,
       updateData,
-      { new: true }
+      { new: true },
     );
     return updatedSubscription;
   } catch (error) {
@@ -70,7 +70,7 @@ export const deleteById = async (id) => {
   return await subscription.save();
 };
 
-export const countSubscription = async (req) => {
+export const countSubscription = async () => {
   try {
     const subscriptionCount = await SubscriptionSchemaModel.countDocuments({
       isDeleted: false,
@@ -79,7 +79,7 @@ export const countSubscription = async (req) => {
       return 0;
     }
     return subscriptionCount;
-  } catch (error) {
+  } catch {
     throw new Error(messages.data_not_found);
   }
 };

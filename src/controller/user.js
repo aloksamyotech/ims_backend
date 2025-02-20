@@ -50,7 +50,7 @@ export const fetchById_User = async (req, res) => {
 };
 
 export const loginUser = async (req, res) => {
-  const { email, password } = req?.body;
+  const { email, password } = req?.body || {};
   const result = await login(email, password);
   if (result.success) {
     return res
@@ -79,7 +79,7 @@ export const updateUser = async (req, res) => {
         .json({ message: messages.not_found });
     }
     return res.status(statusCodes.ok).json(updatedUser);
-  } catch (error) {
+  } catch {
     return res.status(statusCodes.internalServerError).json({
       message: messages.data_update_error,
     });
@@ -112,12 +112,12 @@ export const deleteUser = async (req, res) => {
 
 export const changePassword = async (req, res) => {
   try {
-    const { currentPassword, newPassword } = req?.body;
+    const { currentPassword, newPassword } = req?.body || {};
     const userId = req?.user?._id;
     const result = await changePasswordService(
       userId,
       currentPassword,
-      newPassword
+      newPassword,
     );
 
     if (result.success) {
@@ -129,7 +129,7 @@ export const changePassword = async (req, res) => {
         .status(statusCodes.notFound)
         .json({ success: false, message: result.message });
     }
-  } catch (error) {
+  } catch {
     return res
       .status(statusCodes.internalServerError)
       .json({ success: false, message: messages.server_error });
@@ -137,8 +137,8 @@ export const changePassword = async (req, res) => {
 };
 
 export const changeCompanyStatus = async (req, res) => {
-  const { id } = req?.params;
-  const { isActive } = req?.body;
+  const { id } = req?.params || {};
+  const { isActive } = req?.body || {};
   try {
     const updatedUser = await updateStatus(id, isActive);
     if (!updatedUser) {
@@ -149,7 +149,7 @@ export const changeCompanyStatus = async (req, res) => {
     return res
       .status(statusCodes.ok)
       .json({ success: true, data: updatedUser });
-  } catch (error) {
+  } catch {
     return res.status(statusCodes.internalServerError).json({
       message: messages.fetching_failed,
     });
@@ -164,7 +164,7 @@ export const getCompanyCount = async (req, res) => {
       message: messages.fetching_success,
       count: companyCount,
     });
-  } catch (error) {
+  } catch {
     res.status(statusCodes.internalServerError).json({
       success: false,
       message: messages.fetching_failed,
@@ -178,9 +178,9 @@ export const getAiReportData = async (req, res) => {
     res.status(statusCodes.ok).json({
       success: true,
       data: result.data,
-      message: result.data.response
+      message: result.data.response,
     });
-  } catch (error) {
+  } catch {
     res.status(statusCodes.internalServerError).json({
       success: false,
       message: messages.fetching_failed,

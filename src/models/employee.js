@@ -39,7 +39,7 @@ const EmployeeSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      default: 'employee', 
+      default: "employee",
     },
     isActive: {
       type: Boolean,
@@ -47,7 +47,7 @@ const EmployeeSchema = new mongoose.Schema(
     },
     isDeleted: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 EmployeeSchema.plugin(uniqueValidator);

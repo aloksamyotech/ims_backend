@@ -1,4 +1,4 @@
-import EmpPermissionSchemaModel from '../models/empPermissions.js';
+import EmpPermissionSchemaModel from "../models/empPermissions.js";
 
 export const saveOrUpdate = async (empId, permissions) => {
   let permissionData = await EmpPermissionSchemaModel.findOne({ empId });
@@ -15,4 +15,3 @@ export const saveOrUpdate = async (empId, permissions) => {
 export const fetch = async (empId) => {
   return EmpPermissionSchemaModel.findOne({ empId });
 };
-

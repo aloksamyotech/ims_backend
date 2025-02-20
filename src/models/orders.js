@@ -30,7 +30,7 @@ const ProductOrderSchema = new mongoose.Schema({
   buyingPrice: {
     type: Number,
     required: true,
-  }
+  },
 });
 
 const OrderSchema = new mongoose.Schema(
@@ -59,7 +59,7 @@ const OrderSchema = new mongoose.Schema(
     products: [ProductOrderSchema],
     order_status: {
       type: String,
-      enum: ["pending", "completed" , "cancelled"],
+      enum: ["pending", "completed", "cancelled"],
       default: "pending",
     },
     invoice_no: {
@@ -84,7 +84,7 @@ const OrderSchema = new mongoose.Schema(
     },
     isDeleted: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const generateInvoiceNumber = async () => {

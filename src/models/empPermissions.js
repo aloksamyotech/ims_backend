@@ -10,25 +10,28 @@ const empPermissionSchema = new mongoose.Schema({
   },
   permissions: {
     type: [String],
-    default: ['default'], 
+    default: ["default"],
   },
 });
 
 empPermissionSchema.pre("save", async function (next) {
-    try {
-      if (this.empId) {
-        const employee = await EmployeeSchemaModel.findById(this.empId);
-        if (!employee) {
-          return next(new Error("Employee not found"));
-        }
-        this.empId = employee?._id;
+  try {
+    if (this.empId) {
+      const employee = await EmployeeSchemaModel.findById(this.empId);
+      if (!employee) {
+        return next(new Error("Employee not found"));
       }
-      next();
-    } catch (error) {
-      next(error);
+      this.empId = employee?._id;
     }
-  });
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
-const EmpPermissionSchemaModel= mongoose.model(tableNames.empPermissions, empPermissionSchema);
+const EmpPermissionSchemaModel = mongoose.model(
+  tableNames.empPermissions,
+  empPermissionSchema,
+);
 
 export default EmpPermissionSchemaModel;
