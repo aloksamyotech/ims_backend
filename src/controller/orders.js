@@ -8,6 +8,7 @@ export const create = async (req, res) => {
     const orderResponse = await save(req);
     res.status(statusCodes.created).json(orderResponse);
   } catch (error) {
+    console.log(error);
     res.status(statusCodes.internalServerError).json({error: error });
   }
 };

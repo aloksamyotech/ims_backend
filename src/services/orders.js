@@ -162,6 +162,7 @@ export const save = async (req) => {
 
     return savedOrder;
   } catch (error) {
+    console.log("Err:",error);
     throw new Error(messages.data_add_error + error.message);
   }
 };

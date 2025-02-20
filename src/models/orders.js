@@ -43,23 +43,18 @@ const OrderSchema = new mongoose.Schema(
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: tableNames.customer,
-      required: true,
     },
     customerName: {
       type: String,
-      required: true,
     },
     customerEmail: {
       type: String,
-      required: true,
     },
     customerPhone: {
       type: Number,
-      required: true,
     },
     customerAddress: {
       type: String,
-      required: true,
     },
     products: [ProductOrderSchema],
     order_status: {
