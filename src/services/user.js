@@ -6,10 +6,11 @@ import EmpPermissionSchemaModel from "../models/empPermissions.js";
 import jwt from "jsonwebtoken";
 import { messages } from "../common/constant.js";
 import { testInput } from "../common/ai/ai.js";
+import process from "process";
 
 export const save = async (req) => {
   try {
-    const { name, email, password, role, phone } = req?.body;
+    const { name, email, password, role, phone } = req?.body || {};
     const existingUser = await UserSchemaModel.findOne({ email });
     if (existingUser) {
       return { success: false, message: messages.already_registered };
@@ -97,7 +98,7 @@ export const login = async (email, password) => {
         role: user.role,
         permissions,
       };
-    } else if (user.role === "admin" || "user") {
+    } else if (user.role === "admin" || user.role === "user") {
       payload = {
         _id: user._id,
         name: user.name,
@@ -110,7 +111,7 @@ export const login = async (email, password) => {
     const jwtToken = jwt.sign(payload, process.env.SECRET);
 
     return { success: true, jwtToken, user: payload };
-  } catch (error) {
+  } catch {
     return { success: false, message: messages.server_error };
   }
 };
@@ -120,13 +121,13 @@ export const update = async (id, updateData) => {
     const updatedUser = await UserSchemaModel.findByIdAndUpdate(
       id,
       updateData,
-      { new: true }
+      { new: true },
     );
     if (!updatedUser || updatedUser.isDeleted) {
       throw new Error(messages.data_not_found);
     }
     return updatedUser;
-  } catch (error) {
+  } catch {
     throw new Error(messages.data_add_error);
   }
 };
@@ -144,7 +145,7 @@ export const deleteById = async (id) => {
 export const changePasswordService = async (
   userId,
   currentPassword,
-  newPassword
+  newPassword,
 ) => {
   try {
     const user = await UserSchemaModel.findById(userId);
@@ -163,7 +164,7 @@ export const changePasswordService = async (
     await user.save();
 
     return { success: true, message: messages.password_changed_successfully };
-  } catch (error) {
+  } catch {
     return { success: false, message: messages.server_error };
   }
 };
@@ -177,7 +178,7 @@ export const updateStatus = async (id, isActive) => {
     const updatedUser = await UserSchemaModel.findByIdAndUpdate(
       id,
       { isActive },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedUser || updatedUser.isDeleted) {
@@ -185,12 +186,12 @@ export const updateStatus = async (id, isActive) => {
     }
 
     return updatedUser;
-  } catch (error) {
+  } catch {
     throw new Error(messages.data_add_error);
   }
 };
 
-export const countCompany = async (req) => {
+export const countCompany = async () => {
   try {
     const companyCount = await UserSchemaModel.countDocuments({
       isDeleted: false,
@@ -200,7 +201,7 @@ export const countCompany = async (req) => {
       return 0;
     }
     return companyCount;
-  } catch (error) {
+  } catch {
     throw new Error(messages.data_not_found);
   }
 };
@@ -214,7 +215,7 @@ export const getAiresponse = async (req) => {
     }
     const response = await testInput(rawtext, userId);
     return response;
-  } catch (error) {
+  } catch {
     throw new Error("Data not found");
   }
 };

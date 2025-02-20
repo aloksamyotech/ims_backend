@@ -1,5 +1,5 @@
 import AdminSchemaModel from "../models/master.js";
-import { messages , image_url} from "../common/constant.js";
+import { messages, image_url } from "../common/constant.js";
 
 export const fetch = async (req) => {
   try {
@@ -8,7 +8,7 @@ export const fetch = async (req) => {
     const adminList = await AdminSchemaModel.aggregate([
       {
         $match: {
-          ...condition_obj, 
+          ...condition_obj,
         },
       },
       {
@@ -27,24 +27,22 @@ export const fetch = async (req) => {
   }
 };
 
-  export const update = async (updateData) => {
-    try {
-      const { currencyCode, currencySymbol, logo } = updateData;
+export const update = async (updateData) => {
+  try {
+    const { currencyCode, currencySymbol, logo } = updateData;
 
-      const response = await AdminSchemaModel.findOneAndUpdate(
-        {}, 
-        { currencyCode, currencySymbol, logo }, 
-        { new: true }
-      );
-  
-      if (!response || response.isDeleted) {
-        throw new Error(messages.data_not_found); 
-      }
-      return response;
-    } catch (error) {
-      console.error(error);
-      throw new Error(messages.data_add_error); 
+    const response = await AdminSchemaModel.findOneAndUpdate(
+      {},
+      { currencyCode, currencySymbol, logo },
+      { new: true },
+    );
+
+    if (!response || response.isDeleted) {
+      throw new Error(messages.data_not_found);
     }
-  };
-  
-  
+    return response;
+  } catch (error) {
+    console.error(error);
+    throw new Error(messages.data_add_error);
+  }
+};

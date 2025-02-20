@@ -57,22 +57,22 @@ const SupplierSchema = new mongoose.Schema(
     },
     isDeleted: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-SupplierSchema.pre("save",async function (next) {
+SupplierSchema.pre("save", async function (next) {
   try {
-  if (this.userId) {
-    const user = await UserSchemaModel.findById(this.userId);
-    if (!user) {
-      return next(new Error("User not found"));
+    if (this.userId) {
+      const user = await UserSchemaModel.findById(this.userId);
+      if (!user) {
+        return next(new Error("User not found"));
+      }
+      this.userId = user?._id;
     }
-    this.userId = user?._id;
+    next();
+  } catch (error) {
+    next(error);
   }
-  next();
-} catch (error) {
-  next(error);
-}
 });
 
 const SupplierSchemaModel = mongoose.model(tableNames.supplier, SupplierSchema);

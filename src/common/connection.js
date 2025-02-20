@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
-import dotenv from "dotenv/config";
 import Admin from "../models/master.js";
-import UserSchemaModel from "../models/user.js";
 import AdminSchemaModel from "../models/master.js";
+import process from "process";
 
 const defaultAdmin = {
   name: "Admin",

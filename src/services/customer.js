@@ -4,18 +4,12 @@ import UserSchemaModel from "../models/user.js";
 
 export const save = async (req) => {
   try {
-    const {
-      customernm,
-      email,
-      phone,
-      address,
-      isWholesale,
-      userId,
-    } = req?.body;
+    const { customernm, email, phone, address, isWholesale, userId } =
+      req?.body || {};
 
     const user = await UserSchemaModel.findById(userId);
     if (!user) {
-      return { message: messages.data_not_found }; 
+      return { message: messages.data_not_found };
     }
 
     const existingCustomer = await CustomerSchemaModel.findOne({
@@ -38,39 +32,39 @@ export const save = async (req) => {
     });
 
     const savedCustomer = await customerModel.save();
-    return savedCustomer; 
+    return savedCustomer;
   } catch (error) {
-    return { error: error.message};
+    return { error: error.message };
   }
 };
 
-  
 export const fetch = async (req) => {
   try {
-    const { userId, isWholesale } = req?.query; 
-    const condition_obj = { isDeleted: false }; 
+    const { userId, isWholesale } = req?.query || {};
+    const condition_obj = { isDeleted: false };
 
     if (userId) {
       condition_obj.userId = userId;
     }
 
     if (isWholesale !== undefined) {
-      condition_obj.isWholesale = isWholesale; 
+      condition_obj.isWholesale = isWholesale;
     }
 
-    const customersList = await CustomerSchemaModel.find(condition_obj).sort({ createdAt: -1 });
+    const customersList = await CustomerSchemaModel.find(condition_obj).sort({
+      createdAt: -1,
+    });
 
     return customersList;
-  } catch (error) {
+  } catch {
     throw new Error(messages.fetching_failed);
   }
 };
 
-
 export const fetchById = async (id) => {
   try {
     return await CustomerSchemaModel.findById(id);
-  } catch (error) {
+  } catch {
     throw new Error(messages.fetching_failed);
   }
 };
@@ -80,13 +74,13 @@ export const update = async (id, updateData) => {
     const updatedCustomer = await CustomerSchemaModel.findByIdAndUpdate(
       id,
       updateData,
-      { new: true }
+      { new: true },
     );
     if (!updatedCustomer || updatedCustomer.isDeleted) {
       throw new Error(messages.data_not_found);
     }
     return updatedCustomer;
-  } catch (error) {
+  } catch {
     throw new Error(messages.data_update_error);
   }
 };
@@ -102,11 +96,11 @@ export const deleteById = async (id) => {
 
 export const countCustomer = async (req) => {
   try {
-    const { userId } = req?.query;
+    const { userId } = req?.query || {};
     if (!userId) {
       throw new Error("userId is required");
     }
-    const condition_obj = { isDeleted: false }; 
+    const condition_obj = { isDeleted: false };
 
     if (userId) {
       condition_obj.userId = userId;
@@ -115,16 +109,11 @@ export const countCustomer = async (req) => {
     const customerCount = await CustomerSchemaModel.find(condition_obj);
 
     if (customerCount === 0) {
-      return { message: messages.data_not_found};
+      return { message: messages.data_not_found };
     }
 
     return customerCount.length;
-  } catch (error) {
+  } catch {
     throw new Error(messages.data_not_found);
   }
 };
-
-
-
-
-

@@ -12,7 +12,7 @@ export const save = async (req) => {
       typeOfSupplier,
       shopName,
       userId,
-    } = req?.body;
+    } = req?.body || {};
     const user = await UserSchemaModel.findById(userId);
     if (!user) {
       throw new Error(messages.data_not_found);
@@ -47,15 +47,17 @@ export const save = async (req) => {
 
 export const fetch = async (req) => {
   try {
-    const { userId } = req?.query;
+    const { userId } = req?.query || {};
     const condition_obj = { isDeleted: false };
 
     if (userId) {
       condition_obj.userId = userId;
     }
 
-    return await SupplierSchemaModel.find(condition_obj).sort({ createdAt : -1});
-  } catch (error) {
+    return await SupplierSchemaModel.find(condition_obj).sort({
+      createdAt: -1,
+    });
+  } catch {
     throw new Error(messages.fetching_failed);
   }
 };
@@ -63,7 +65,7 @@ export const fetch = async (req) => {
 export const fetchById = async (id) => {
   try {
     return await SupplierSchemaModel.findById(id);
-  } catch (error) {
+  } catch {
     throw new Error(messages.fetching_failed);
   }
 };
@@ -73,13 +75,13 @@ export const update = async (id, updateData) => {
     const updatedSupplier = await SupplierSchemaModel.findByIdAndUpdate(
       id,
       updateData,
-      { new: true }
+      { new: true },
     );
     if (!updatedSupplier || updatedSupplier.isDeleted) {
       throw new Error(messages.data_not_found);
     }
     return updatedSupplier;
-  } catch (error) {
+  } catch {
     throw new Error(messages.data_update_error);
   }
 };
@@ -95,7 +97,7 @@ export const deleteById = async (id) => {
 
 export const countSupplier = async (req) => {
   try {
-    const { userId } = req?.query;
+    const { userId } = req?.query || {};
     if (!userId) {
       throw new Error("userId is required");
     }
@@ -113,7 +115,7 @@ export const countSupplier = async (req) => {
     }
 
     return supplierCount.length;
-  } catch (error) {
+  } catch {
     throw new Error(messages.data_not_found);
   }
 };

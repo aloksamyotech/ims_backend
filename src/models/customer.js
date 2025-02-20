@@ -11,7 +11,6 @@ const CustomerSchema = new mongoose.Schema(
     },
     customernm: {
       type: String,
-      required: true,
       required: function () {
         return this.isWholesale === true;
       },
@@ -19,9 +18,8 @@ const CustomerSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      required: true,
       required: function () {
-        return this.isWholesale === true; 
+        return this.isWholesale === true;
       },
       trim: true,
     },
@@ -32,15 +30,14 @@ const CustomerSchema = new mongoose.Schema(
     },
     address: {
       type: String,
-      required: true,
       required: function () {
-        return this.isWholesale === true; 
+        return this.isWholesale === true;
       },
       trim: true,
     },
     isWholesale: {
       type: Boolean,
-      default: true, 
+      default: true,
     },
     isActive: {
       type: Boolean,
@@ -48,22 +45,22 @@ const CustomerSchema = new mongoose.Schema(
     },
     isDeleted: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-CustomerSchema.pre("save",async function (next) {
+CustomerSchema.pre("save", async function (next) {
   try {
-  if (this.userId) {
-    const user = await UserSchemaModel.findById(this.userId);
-    if (!user) {
-      return next(new Error("User not found"));
+    if (this.userId) {
+      const user = await UserSchemaModel.findById(this.userId);
+      if (!user) {
+        return next(new Error("User not found"));
+      }
+      this.userId = user?._id;
     }
-    this.userId = user?._id;
+    next();
+  } catch (error) {
+    next(error);
   }
-  next();
-} catch (error) {
-  next(error);
-}
 });
 
 const CustomerSchemaModel = mongoose.model(tableNames.customer, CustomerSchema);

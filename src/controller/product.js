@@ -35,7 +35,7 @@ export const fetch_product = async (req, res) => {
     if (productResponse.length !== 0) {
       res.status(statusCodes.ok).json(productResponse);
     }
-  } catch (error) {
+  } catch {
     res.status(statusCodes.internalServerError).json({
       message: messages.fetching_failed,
     });
@@ -52,7 +52,7 @@ export const fetchById_product = async (req, res) => {
         .json({ message: messages.data_not_found });
     }
     res.status(statusCodes.ok).json(productResponse);
-  } catch (error) {
+  } catch {
     res.status(statusCodes.internalServerError).json({
       message: messages.fetching_failed,
     });
@@ -75,7 +75,7 @@ export const updateProduct = async (req, res) => {
         .json({ message: messages.not_found });
     }
     return res.status(statusCodes.ok).json(updatedProduct);
-  } catch (error) {
+  } catch {
     return res.status(statusCodes.internalServerError).json({
       message: messages.data_update_error,
     });
@@ -115,7 +115,7 @@ export const getLowStockCount = async (req, res) => {
       count: stockCount.length,
       data: stockCount,
     });
-  } catch (error) {
+  } catch {
     res.status(statusCodes.internalServerError).json({
       success: false,
       message: messages.fetching_failed,
@@ -167,7 +167,7 @@ export const alertLowStock = async (req, res) => {
 
 export const handlePurchase = async (req, res) => {
   try {
-    const { productId, qty, price } = req?.body;
+    const { productId, qty, price } = req?.body || {};
 
     const updatedProduct = await updateAvgCost(productId, qty, price);
     return res.status(statusCodes.ok).json({

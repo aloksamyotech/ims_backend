@@ -30,12 +30,12 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["user", "admin" , "employee"],
+      enum: ["user", "admin", "employee"],
       default: "user",
     },
     isDeleted: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 userSchema.plugin(uniqueValidator);

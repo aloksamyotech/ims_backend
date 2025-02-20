@@ -1,5 +1,13 @@
-import { save , fetch , deleteById , fetchById,   handlePurchaseStatus, countPurchases,getTotalPurchaseForEachCompany} from "../services/purchase.js";
-import { fetchSupplierProductReport } from "../services/reports.js"; 
+import {
+  save,
+  fetch,
+  deleteById,
+  fetchById,
+  handlePurchaseStatus,
+  countPurchases,
+  getTotalPurchaseForEachCompany,
+} from "../services/purchase.js";
+import { fetchSupplierProductReport } from "../services/reports.js";
 import { statusCodes, messages } from "../common/constant.js";
 
 export const create = async (req, res) => {
@@ -7,7 +15,7 @@ export const create = async (req, res) => {
     const purchaseResponse = await save(req);
     res.status(statusCodes.created).json(purchaseResponse);
   } catch (error) {
-    res.status(statusCodes.internalServerError).json({error: error, });
+    res.status(statusCodes.internalServerError).json({ error: error });
   }
 };
 
@@ -20,7 +28,7 @@ export const fetch_purchase = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(statusCodes.internalServerError).json({
-      message : messages.fetching_failed
+      message: messages.fetching_failed,
     });
   }
 };
@@ -28,43 +36,51 @@ export const fetch_purchase = async (req, res) => {
 export const fetchById_purchase = async (req, res) => {
   const id = req?.params?.id;
   try {
-    const purchaseResponse = await fetchById(id); 
+    const purchaseResponse = await fetchById(id);
     if (!purchaseResponse) {
-      return res.status(statusCodes.notFound).json({ message: messages.data_not_found });
+      return res
+        .status(statusCodes.notFound)
+        .json({ message: messages.data_not_found });
     }
     res.status(statusCodes.ok).json(purchaseResponse);
-  } catch (error) {
+  } catch {
     res.status(statusCodes.internalServerError).json({
-      message : messages.fetching_failed
+      message: messages.fetching_failed,
     });
   }
 };
 
-
 export const deletePurchase = async (req, res) => {
   const id = req?.params?.id;
   if (!id) {
-    return res.status(statusCodes.badRequest).json({ message: messages.required });
+    return res
+      .status(statusCodes.badRequest)
+      .json({ message: messages.required });
   }
   try {
     await deleteById(id);
-    res .status(statusCodes.ok) .json({ message: messages.data_deletion_success });
+    res
+      .status(statusCodes.ok)
+      .json({ message: messages.data_deletion_success });
   } catch (error) {
     if (error.message === messages.not_found) {
-      return res .status(statusCodes.notFound) .json({ message: messages.data_not_found });
+      return res
+        .status(statusCodes.notFound)
+        .json({ message: messages.data_not_found });
     }
-    res.status(statusCodes.internalServerError).json({message : messages.fetching_failed
-    });
+    res
+      .status(statusCodes.internalServerError)
+      .json({ message: messages.fetching_failed });
   }
 };
 
 export const getSupplierProductReport = async (req, res) => {
   try {
     const reportResponse = await fetchSupplierProductReport(req);
-      res.status(statusCodes.ok).json(reportResponse);
-  } catch (error) {
+    res.status(statusCodes.ok).json(reportResponse);
+  } catch {
     res.status(statusCodes.internalServerError).json({
-      message : messages.fetching_failed
+      message: messages.fetching_failed,
     });
   }
 };
@@ -72,14 +88,16 @@ export const getSupplierProductReport = async (req, res) => {
 export const updatePurchaseStatus = async (req, res) => {
   try {
     const id = req?.params?.id;
-    const action  = req?.body?.action; 
-    const updatedPurchase = await handlePurchaseStatus(id, action); 
+    const action = req?.body?.action;
+    const updatedPurchase = await handlePurchaseStatus(id, action);
     return res.status(statusCodes.ok).json({
       message: messages.data_update_success,
       order: updatedPurchase,
     });
   } catch (error) {
-    return res.status(statusCodes.internalServerError).json({ message: error.message });
+    return res
+      .status(statusCodes.internalServerError)
+      .json({ message: error.message });
   }
 };
 
@@ -98,7 +116,7 @@ export const getPurchaseCount = async (req, res) => {
       message: messages.fetching_success,
       count: purchaseCount,
     });
-  } catch (error) {
+  } catch {
     res.status(statusCodes.internalServerError).json({
       success: false,
       message: messages.fetching_failed,
@@ -110,7 +128,9 @@ export const getCompanyTotalPurchase = async (req, res) => {
   try {
     const totalPurchaseData = await getTotalPurchaseForEachCompany(req);
     if (totalPurchaseData.length === 0) {
-      return res.status(statusCodes.notFound).json({ message: "No purchase data found for any company." });
+      return res
+        .status(statusCodes.notFound)
+        .json({ message: "No purchase data found for any company." });
     }
 
     return res.status(statusCodes.ok).json({
@@ -126,4 +146,3 @@ export const getCompanyTotalPurchase = async (req, res) => {
     });
   }
 };
-

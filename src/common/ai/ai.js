@@ -15,6 +15,7 @@ import {
   emptyResponse,
   commonResponse,
 } from "./responseFormat.js";
+import process from "process";
 
 dotenv.config();
 
@@ -104,17 +105,17 @@ const executeMongooseQuery = async (queryString, schemaUsed, userId) => {
   try {
     let modifiedQuery = queryString.replace(
       /userId: userId/g,
-      `userId: '${userId}'`
+      `userId: '${userId}'`,
     );
 
     if (!modifiedQuery.includes("userId:")) {
       modifiedQuery = modifiedQuery.replace(
         /find\({/,
-        `find({ userId: '${userId}',`
+        `find({ userId: '${userId}',`,
       );
       modifiedQuery = modifiedQuery.replace(
         /findOne\({/,
-        `findOne({ userId: '${userId}',`
+        `findOne({ userId: '${userId}',`,
       );
     }
     const wrappedQuery = `
@@ -182,7 +183,7 @@ export const testInput = async (input, userId) => {
     const dbResult = await executeMongooseQuery(
       queryData.mongooseQuery,
       queryData.schemaUsed,
-      userId
+      userId,
     );
 
     if (dbResult === null || dbResult.length === 0) {
@@ -210,7 +211,7 @@ export const testInput = async (input, userId) => {
     const response = await generateResponse(
       input,
       dbResult,
-      queryData.queryType
+      queryData.queryType,
     );
     return {
       success: true,

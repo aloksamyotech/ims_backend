@@ -40,14 +40,13 @@ const adminSchema = new mongoose.Schema(
     },
     currencySymbol: {
       type: String,
-      default: "₹", 
+      default: "₹",
     },
     logo: {
       type: String,
-      default: "/uploads/inventory-logo.png",
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 adminSchema.plugin(uniqueValidator);

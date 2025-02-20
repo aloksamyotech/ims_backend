@@ -29,9 +29,12 @@ const SubscriptionSchema = new mongoose.Schema(
     },
     isDeleted: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-const SubscriptionSchemaModel = mongoose.model(tableNames.subscription, SubscriptionSchema);
+const SubscriptionSchemaModel = mongoose.model(
+  tableNames.subscription,
+  SubscriptionSchema,
+);
 
 export default SubscriptionSchemaModel;

@@ -42,8 +42,8 @@ const PurchaseSchema = new mongoose.Schema(
       required: true,
     },
     supplierName: {
-      type:String,
-      required:true,
+      type: String,
+      required: true,
     },
     supplierEmail: {
       type: String,
@@ -63,7 +63,7 @@ const PurchaseSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "completed" , "cancelled"],
+      enum: ["pending", "completed", "cancelled"],
       default: "pending",
     },
     total: {
@@ -81,7 +81,7 @@ const PurchaseSchema = new mongoose.Schema(
     isDeleted: { type: Boolean, default: false },
     products: [ProductOrderSchema],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const generatePurchaseNumber = async () => {
@@ -96,46 +96,45 @@ const generatePurchaseNumber = async () => {
   return `PRS-${String(newPurchaseNumber).padStart(4, "0")}`;
 };
 
-    PurchaseSchema.pre("save", async function (next) {
-      try {
-        if (this.isNew) {
-          this.purchase_no = await generatePurchaseNumber();
-        }
-    
-        if (this.productId) {
-          const product = await ProductSchemaModel.findById(this.productId);
-          if (!product) {
-            return next(new Error("Product not found"));
-          }
-          this.productId = product?._id;
-          this.productName = product?.productnm;
-          this.categoryName = product?.categoryName;
-        }
-       
-        if (this.supplierId) {
-          const supplier = await SupplierSchemaModel.findById(this.supplierId);
-          if (!supplier) {
-            return next(new Error("Supplier not found"));
-          }
-          this.supplierName = supplier.suppliernm;
-          this.supplierEmail = supplier ? supplier.email : null;
-          this.supplierPhone = supplier ? supplier.phone : null;
-        }
+PurchaseSchema.pre("save", async function (next) {
+  try {
+    if (this.isNew) {
+      this.purchase_no = await generatePurchaseNumber();
+    }
 
-        if (this.userId) {
-          const user = await UserSchemaModel.findById(this.userId);
-          if (!user) {
-            return next(new Error("User not found"));
-          }
-          this.userId = user?._id;
-        }    
-
-        next();
-      } catch (error) {
-        next(error);
+    if (this.productId) {
+      const product = await ProductSchemaModel.findById(this.productId);
+      if (!product) {
+        return next(new Error("Product not found"));
       }
-    });
-    
+      this.productId = product?._id;
+      this.productName = product?.productnm;
+      this.categoryName = product?.categoryName;
+    }
+
+    if (this.supplierId) {
+      const supplier = await SupplierSchemaModel.findById(this.supplierId);
+      if (!supplier) {
+        return next(new Error("Supplier not found"));
+      }
+      this.supplierName = supplier.suppliernm;
+      this.supplierEmail = supplier ? supplier.email : null;
+      this.supplierPhone = supplier ? supplier.phone : null;
+    }
+
+    if (this.userId) {
+      const user = await UserSchemaModel.findById(this.userId);
+      if (!user) {
+        return next(new Error("User not found"));
+      }
+      this.userId = user?._id;
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 
 PurchaseSchema.plugin(uniqueValidator);
 

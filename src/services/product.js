@@ -18,7 +18,7 @@ export const save = async (req) => {
       categoryId,
       userId,
       avgCost,
-    } = req?.body;
+    } = req?.body || {};
 
     const category = await CategorySchemaModel.findById(categoryId);
     if (!category) {
@@ -52,26 +52,13 @@ export const save = async (req) => {
 };
 
 export const bulkUploadProducts = async (req) => {
-  const { productsData } = req?.body;
+  const { productsData } = req?.body || {};
 
   try {
     const savedProducts = [];
 
     for (const product of productsData) {
-      const {
-        userId,
-        productnm,
-        buyingPrice,
-        sellingPrice,
-        quantity,
-        quantityAlert,
-        tax,
-        margin,
-        notes,
-        categoryId,
-        categoryName,
-        avgCost,
-      } = product;
+      const { userId, categoryId, categoryName } = product;
 
       let category;
 
@@ -113,7 +100,7 @@ export const bulkUploadProducts = async (req) => {
 
 export const fetch = async (req) => {
   try {
-    const { userId } = req?.query;
+    const { userId } = req?.query || {};
     const condition_obj = { isDeleted: false };
 
     if (userId) {
@@ -201,7 +188,7 @@ export const update = async (id, updateData) => {
     const updatedProduct = await ProductSchemaModel.findByIdAndUpdate(
       id,
       updateData,
-      { new: true }
+      { new: true },
     );
     if (!updatedProduct || updatedProduct.isDeleted) {
       throw new Error(messages.data_not_found);
@@ -224,7 +211,7 @@ export const deleteById = async (id) => {
 
 export const lowStockProducts = async (req) => {
   try {
-    const { userId } = req?.query;
+    const { userId } = req?.query || {};
     if (!userId) {
       throw new Error("userId is required");
     }
@@ -278,7 +265,7 @@ export const updateAvgCost = async (productId, qty, price) => {
     await product.save();
 
     return product;
-  } catch (error) {
+  } catch {
     throw new Error("Error updating average cost");
   }
 };
