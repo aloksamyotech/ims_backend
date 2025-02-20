@@ -2,7 +2,7 @@ import multer from "multer";
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "././uploads");
+    cb(null, './uploads'); 
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -10,6 +10,12 @@ const storage = multer.diskStorage({
   },
 });
 
-export const upload = multer({ storage: storage }).single("image");
+export const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 50 * 1024 * 1024 }
+}).single('image');
 
-export const uploadLogo = multer({ storage: storage }).single("logo");
+export const uploadLogo = multer({ 
+  storage: storage,
+  limits: { fileSize: 50 * 1024 * 1024 } 
+}).single('logo');
