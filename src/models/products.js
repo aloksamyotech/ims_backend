@@ -36,13 +36,12 @@ const ProductSchema = new mongoose.Schema(
     },
     quantity: {
       type: Number,
-      required: true,
       default: 0,
     },
     quantityAlert: {
-       type: Number,
-       required: true,
-       default : 30,
+      type: Number,
+      required: true,
+      default: 30,
     },
     product_no: {
       type: String,
@@ -117,6 +116,20 @@ ProductSchema.pre("save", async function (next) {
         .replace(/^-+/, "")
         .replace(/-+$/, "");
     }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+ProductSchema.pre("findOneAndUpdate", async function (next) {
+  try {
+    const update = this.getUpdate();
+    if (update.categoryId) {
+      const category = await CategorySchemaModel.findById(update.categoryId);
+      update.categoryName = category ? category.catnm : null;
+    }
+    this.setUpdate(update);
     next();
   } catch (error) {
     next(error);

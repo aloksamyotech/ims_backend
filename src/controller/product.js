@@ -61,23 +61,23 @@ export const fetchById_product = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
   const id = req?.params?.id;
-  if (!id) {
-    return res
-      .status(statusCodes.badRequest)
-      .json({ message: messages.required });
-  }
-  const updateData = req?.body;
+  let image = req.file ? `/uploads/${req.file.filename}` : undefined;
+  const updateData = req?.body || {};
+  delete updateData._id;
   try {
-    const updatedProduct = await update(id, updateData);
+    const updatedProduct = await update(id, updateData, image);
     if (!updatedProduct) {
       return res
         .status(statusCodes.notFound)
         .json({ message: messages.not_found });
     }
-    return res.status(statusCodes.ok).json(updatedProduct);
+    return res
+      .status(statusCodes.ok)
+      .json({ success: true, data: updatedProduct });
   } catch (error) {
     return res.status(statusCodes.internalServerError).json({
       message: messages.data_update_error,
+      error: error.message,
     });
   }
 };

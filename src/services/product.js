@@ -195,17 +195,34 @@ export const fetchById = async (id) => {
     throw new Error(messages.fetching_failed + error.message);
   }
 };
-
-export const update = async (id, updateData) => {
+export const update = async (id, updateData, image) => {
   try {
-    const updatedProduct = await ProductSchemaModel.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true }
-    );
-    if (!updatedProduct || updatedProduct.isDeleted) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new Error(messages.invalid_format);
+    }
+    const product = await ProductSchemaModel.findById(id);
+    if (!product || product.isDeleted) {
       throw new Error(messages.data_not_found);
     }
+
+    updateData.quantity = product.quantity;
+    if (!image) {
+      updateData.image = product.image;
+    } else {
+      updateData.image = image;
+    }
+    if (updateData.categoryId) {
+      const category = await CategorySchemaModel.findById(
+        updateData.categoryId
+      );
+      updateData.categoryName = category ? category.catnm : null;
+    }
+
+    const updatedProduct = await ProductSchemaModel.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
     return updatedProduct;
   } catch (error) {
     throw new Error(messages.data_update_error + error.message);
