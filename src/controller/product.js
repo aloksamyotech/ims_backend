@@ -61,7 +61,7 @@ export const fetchById_product = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
   const id = req?.params?.id;
-  let image = req.file ? `/uploads/${req.file.filename}` : undefined;
+  let image = req.file ? `uploads/${req.file.filename}` : undefined;
   const updateData = req?.body || {};
   delete updateData._id;
   try {
