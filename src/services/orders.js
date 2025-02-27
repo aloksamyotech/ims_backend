@@ -14,17 +14,23 @@ import UserSchemaModel from "../models/user.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const invoicesDir = path.join(__dirname, "../uploads/invoices");
+
+const ensureDirectoryExists = (directory) => {
+  if (!fs.existsSync(directory)) {
+    fs.mkdirSync(directory, { recursive: true });
+  }
+};
+
 const generateInvoicePDF = async (orderData) => {
+  ensureDirectoryExists(invoicesDir);
+
   const doc = new PDFDocument({ margin: 30, size: "A4" });
 
-  const filePath = path.join(
-    __dirname,
-    "../uploads/invoices",
-    `invoice-${orderData._id}.pdf`
-  );
+  const filePath = path.join(invoicesDir, `invoice-${orderData._id}.pdf`);
+  const writeStream = fs.createWriteStream(filePath);
 
-  doc.pipe(fs.createWriteStream(filePath));
-
+  doc.pipe(writeStream);
   doc
     .fontSize(16)
     .font("Times-BoldItalic")
@@ -96,7 +102,10 @@ const generateInvoicePDF = async (orderData) => {
 
   doc.end();
 
-  return filePath;
+  return new Promise((resolve, reject) => {
+    writeStream.on("finish", () => resolve(filePath));
+    writeStream.on("error", reject);
+  });
 };
 
 export const save = async (req) => {
@@ -159,10 +168,13 @@ export const save = async (req) => {
     const invoicePath = await generateInvoicePDF(savedOrder);
 
     await sendInvoiceEmail(savedOrder.customerEmail, invoicePath);
+    if (fs.existsSync(invoicePath)) {
+      fs.unlinkSync(invoicePath);
+    }
 
     return savedOrder;
   } catch (error) {
-    console.log("Err:",error);
+    console.log("Err:", error);
     throw new Error(messages.data_add_error + error.message);
   }
 };
