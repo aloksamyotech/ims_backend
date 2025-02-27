@@ -1,10 +1,10 @@
-import { save , update , fetch , deleteById , fetchById , countCustomer} from '../services/customer.js';
+import { save , fetch, deleteById, fetchById, update, countEmployee}  from '../services/employee.js';
 import { statusCodes, messages } from '../common/constant.js';
 
 export const create = async (req, res) => {
   try {
-    const customerResponse = await save(req)
-    res.status(statusCodes.ok).json(customerResponse);
+    const employeeResponse = await save(req);
+    res.status(statusCodes.ok).json(employeeResponse);
   } catch (error) {
     res.status(statusCodes.internalServerError).json({
       message : messages.data_add_error
@@ -12,11 +12,11 @@ export const create = async (req, res) => {
   }
 }
 
-export const fetch_customer = async (req, res) => {
+export const fetch_employee = async (req, res) => {
   try {
-    const customerResponse = await fetch(req);
-    if (customerResponse.length !== 0) {
-      res.status(statusCodes.ok).json(customerResponse);
+    const employeeResponse = await fetch(req);
+    if (employeeResponse.length !== 0) {
+      res.status(statusCodes.ok).json(employeeResponse);
     }
   }
   catch (error) {
@@ -24,19 +24,31 @@ export const fetch_customer = async (req, res) => {
   }
 };
 
+export const fetchById_employee = async (req, res) => {
+  try {
+    const id = req?.params?.id;
+    const employee = await fetchById(id); 
+    if (!employee) {
+      return res.status(statusCodes.notFound).json({ message:messages.data_not_found });
+    }
+    return res.status(statusCodes.ok).json(employee); 
+  } catch (error) {
+    return res.status(statusCodes.internalServerError).json({ message: messages.fetching_failed, error: error.message }); 
+  }
+};
 
-export const updateCustomer = async (req, res) => {
+export const updateEmployee = async (req, res) => {
   const id  = req?.params?.id; 
   if (!id) {
     return res.status(statusCodes.badRequest).json(messages.required );
   }
   const updateData = req?.body; 
   try {
-    const updatedCustomer = await update(id, updateData);
-    if (!updatedCustomer) {
+    const updatedEmployee = await update(id, updateData);
+    if (!updatedEmployee) {
       return res.status(statusCodes.notFound).json({ message: messages.not_found });
     }
-    return res.status(statusCodes.ok).json(updatedCustomer);
+    return res.status(statusCodes.ok).json(updatedEmployee);
   } catch (error) {
     return res.status(statusCodes.internalServerError).json({ 
       message: messages.data_update_error
@@ -44,20 +56,7 @@ export const updateCustomer = async (req, res) => {
   }
 };
 
-export const fetchById_customer = async (req, res) => {
-  try {
-    const id = req?.params?.id;
-    const customer = await fetchById(id); 
-    if (!customer) {
-      return res.status(statusCodes.notFound).json({ message:messages.data_not_found });
-    }
-    return res.status(statusCodes.ok).json(customer); 
-  } catch (error) {
-    return res.status(statusCodes.internalServerError).json({ message: messages.fetching_failed, error: error.message }); 
-  }
-};
-
-export const deleteCustomer = async (req, res) => {
+export const deleteEmployee = async (req, res) => {
   const id = req?.params?.id;
   if (!id) {
     return res.status(statusCodes.badRequest).json({ message: messages.required });
@@ -73,10 +72,11 @@ export const deleteCustomer = async (req, res) => {
   }
 };
 
-export const getCustomerCount = async (req, res) => {
+
+export const getEmployeeCount = async (req, res) => {
   try {
-    const customerCount = await countCustomer(req);
-    if (customerCount === 0) {
+    const employeeCount = await countEmployee(req);
+    if (employeeCount === 0) {
       return res.status(statusCodes.ok).json({
         success: true,
         message: messages.data_not_found,
@@ -87,7 +87,7 @@ export const getCustomerCount = async (req, res) => {
     res.status(statusCodes.ok).json({
       success: true,
       message: messages.fetching_success,
-      count: customerCount,
+      count: employeeCount,
     });
   } catch (error) {
     res.status(statusCodes.internalServerError).json({
@@ -96,8 +96,3 @@ export const getCustomerCount = async (req, res) => {
     });
   }
 };
-
-
-
-
-

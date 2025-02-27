@@ -1,45 +1,38 @@
 import { messages } from "../common/constant.js";
-import SupplierSchemaModel from "../models/supplier.js";
+import { encryptText } from "../common/helper.js";
+import EmployeeSchemaModel from "../models/employee.js";
 import UserSchemaModel from "../models/user.js";
 
 export const save = async (req) => {
   try {
-    const {
-      suppliernm,
-      email,
-      phone,
-      address,
-      typeOfSupplier,
-      shopName,
-      userId,
-    } = req?.body;
+    const { name, email, password, phone, address, userId } = req?.body;
+
     const user = await UserSchemaModel.findById(userId);
     if (!user) {
       throw new Error(messages.data_not_found);
     }
 
-    const existingSupplier = await SupplierSchemaModel.findOne({
+    const existingEmployee = await EmployeeSchemaModel.findOne({
       email,
       userId,
       isDeleted: false,
     });
 
-    if (existingSupplier) {
+    if (existingEmployee) {
       return { message: messages.already_exist };
     }
 
-    const supplierModel = new SupplierSchemaModel({
-      suppliernm,
+    const encryptedPassword = encryptText(password);
+    const employeeModel = new EmployeeSchemaModel({
+      name,
       email,
+      password: encryptedPassword,
       phone,
       address,
-      typeOfSupplier,
-      shopName,
       userId,
     });
 
-    const savedCustomer = await supplierModel.save();
-    return savedCustomer;
+    return await employeeModel.save();
   } catch (error) {
     return { error: error.message };
   }
@@ -54,7 +47,10 @@ export const fetch = async (req) => {
       condition_obj.userId = userId;
     }
 
-    return await SupplierSchemaModel.find(condition_obj).sort({ createdAt : -1});
+    const employeeList = await EmployeeSchemaModel.find(condition_obj).sort({
+      createdAt: -1,
+    });
+    return employeeList;
   } catch (error) {
     throw new Error(messages.fetching_failed);
   }
@@ -62,7 +58,7 @@ export const fetch = async (req) => {
 
 export const fetchById = async (id) => {
   try {
-    return await SupplierSchemaModel.findById(id);
+    return await EmployeeSchemaModel.findById(id);
   } catch (error) {
     throw new Error(messages.fetching_failed);
   }
@@ -70,49 +66,46 @@ export const fetchById = async (id) => {
 
 export const update = async (id, updateData) => {
   try {
-    const updatedSupplier = await SupplierSchemaModel.findByIdAndUpdate(
+    const updatedEmployee = await EmployeeSchemaModel.findByIdAndUpdate(
       id,
       updateData,
       { new: true }
     );
-    if (!updatedSupplier || updatedSupplier.isDeleted) {
+    if (!updatedEmployee || updatedEmployee.isDeleted) {
       throw new Error(messages.data_not_found);
     }
-    return updatedSupplier;
+    return updatedEmployee;
   } catch (error) {
     throw new Error(messages.data_update_error);
   }
 };
 
 export const deleteById = async (id) => {
-  const supplier = await SupplierSchemaModel.findById(id);
-  if (!supplier) {
+  const employee = await EmployeeSchemaModel.findById(id);
+  if (!employee) {
     throw new Error(messages.data_not_found);
   }
-  supplier.isDeleted = true;
-  return await supplier.save();
+  employee.isDeleted = true;
+  return await employee.save();
 };
 
-export const countSupplier = async (req) => {
+export const countEmployee = async (req) => {
   try {
     const { userId } = req?.query;
     if (!userId) {
       throw new Error("userId is required");
     }
 
-    const condition_obj = { isDeleted: false };
+    const employeeCount = await EmployeeSchemaModel.find({
+      isDeleted: false,
+      userId: userId,
+    });
 
-    if (userId) {
-      condition_obj.userId = userId;
-    }
-
-    const supplierCount = await SupplierSchemaModel.find(condition_obj);
-
-    if (supplierCount === 0) {
+    if (employeeCount === 0) {
       return { message: messages.data_not_found };
     }
 
-    return supplierCount.length;
+    return employeeCount.length;
   } catch (error) {
     throw new Error(messages.data_not_found);
   }

@@ -1,5 +1,6 @@
 import { messages } from "../common/constant.js";
 import CustomerSchemaModel from "../models/customer.js";
+import UserSchemaModel from "../models/user.js";
 
 export const save = async (req) => {
   try {
@@ -9,10 +10,23 @@ export const save = async (req) => {
       phone,
       address,
       isWholesale,
-      accountHolder,
-      accountNumber,
-      bankName,
+      userId,
     } = req?.body;
+
+    const user = await UserSchemaModel.findById(userId);
+    if (!user) {
+      return { message: messages.data_not_found }; 
+    }
+
+    const existingCustomer = await CustomerSchemaModel.findOne({
+      email,
+      userId,
+      isDeleted: false,
+    });
+
+    if (existingCustomer) {
+      return { message: messages.already_exist };
+    }
 
     const customerModel = new CustomerSchemaModel({
       customernm,
@@ -20,33 +34,42 @@ export const save = async (req) => {
       phone,
       address,
       isWholesale,
-      accountHolder,
-      accountNumber,
-      bankName,
+      userId,
     });
 
-    return await customerModel.save();
+    const savedCustomer = await customerModel.save();
+    return savedCustomer; 
   } catch (error) {
-    return error;
+    return { error: error.message};
   }
 };
 
+  
 export const fetch = async (req) => {
   try {
-    const { isWholesale } = req?.query;
-    let customersList;
+    const { userId, isWholesale } = req?.query; 
+    const condition_obj = { isDeleted: false }; 
+
+    if (userId) {
+      condition_obj.userId = userId;
+    }
 
     if (isWholesale !== undefined) {
-      customersList = await CustomerSchemaModel.find({
-        isWholesale: isWholesale,
-        isDeleted: false,
-      });
-    } else {
-      customersList = await CustomerSchemaModel.find({
-        isDeleted: false,
-      });
+      condition_obj.isWholesale = isWholesale; 
     }
+
+    const customersList = await CustomerSchemaModel.find(condition_obj).sort({ createdAt: -1 });
+
     return customersList;
+  } catch (error) {
+    throw new Error(messages.fetching_failed);
+  }
+};
+
+
+export const fetchById = async (id) => {
+  try {
+    return await CustomerSchemaModel.findById(id);
   } catch (error) {
     throw new Error(messages.fetching_failed);
   }
@@ -76,3 +99,32 @@ export const deleteById = async (id) => {
   customer.isDeleted = true;
   return await customer.save();
 };
+
+export const countCustomer = async (req) => {
+  try {
+    const { userId } = req?.query;
+    if (!userId) {
+      throw new Error("userId is required");
+    }
+    const condition_obj = { isDeleted: false }; 
+
+    if (userId) {
+      condition_obj.userId = userId;
+    }
+
+    const customerCount = await CustomerSchemaModel.find(condition_obj);
+
+    if (customerCount === 0) {
+      return { message: messages.data_not_found};
+    }
+
+    return customerCount.length;
+  } catch (error) {
+    throw new Error(messages.data_not_found);
+  }
+};
+
+
+
+
+

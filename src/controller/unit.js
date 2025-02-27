@@ -25,8 +25,8 @@ export const fetch_unit = async (req, res) => {
 };
 
 export const updateUnit = async (req, res) => {
-  const { id } = req.params; 
-  const updateData = req.body; 
+  const id = req?.params?.id; 
+  const updateData = req?.body; 
   try {
     const updatedUnit = await update(id, updateData);
     if (!updatedUnit) {
@@ -40,7 +40,7 @@ export const updateUnit = async (req, res) => {
 
 export const deleteUnit = async (req, res) => {
   try {
-      const id = req.params.id;
+      const id = req?.params?.id;
       await deleteById(id);
       res.status(statusCodes.ok).json({ msg: messages.data_deletion_success });
   } catch (error) {

@@ -3,6 +3,7 @@ import uniqueValidator from "mongoose-unique-validator";
 import { tableNames } from "../common/constant.js";
 import ProductSchemaModel from "./products.js";
 import CustomerSchemaModel from "./customer.js";
+import UserSchemaModel from "./user.js";
 
 const ProductOrderSchema = new mongoose.Schema({
   productId: {
@@ -26,36 +27,40 @@ const ProductOrderSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  buyingPrice: {
+    type: Number,
+    required: true,
+  }
 });
 
 const OrderSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: tableNames.users,
+      required: true,
+    },
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: tableNames.customer,
-      required: true,
     },
     customerName: {
       type: String,
-      required: true,
     },
     customerEmail: {
       type: String,
-      required: true,
     },
     customerPhone: {
       type: Number,
-      required: true,
     },
     customerAddress: {
       type: String,
-      required: true,
     },
     products: [ProductOrderSchema],
     order_status: {
       type: String,
-      enum: ["Pending", "Completed"],
-      default: "Pending",
+      enum: ["pending", "completed" , "cancelled"],
+      default: "pending",
     },
     invoice_no: {
       type: String,
@@ -77,6 +82,7 @@ const OrderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
@@ -107,6 +113,8 @@ OrderSchema.pre("save", async function (next) {
       this.productId = product?._id;
       this.productName = product?.productnm;
       this.categoryName = product?.categoryName;
+      this.price = product?.sellingPrice;
+      this.buyingPrice = product?.avgCost;
     }
 
     if (this.customerId) {
@@ -120,6 +128,15 @@ OrderSchema.pre("save", async function (next) {
       this.customerPhone = customer ? customer.phone : null;
       this.customerAddress = customer ? customer.address : null;
     }
+
+    if (this.userId) {
+      const user = await UserSchemaModel.findById(this.userId);
+      if (!user) {
+        return next(new Error("User not found"));
+      }
+      this.userId = user?._id;
+    }
+
     next();
   } catch (error) {
     next(error);

@@ -28,6 +28,9 @@ export const tableNames = {
   users: "users",
   purchase: "purchase",
   admin: "admin",
+  subscription: "subscription",
+  employee: "employee",
+  empPermissions : "empPermissions",
 };
 
 export const messages = {
@@ -48,9 +51,12 @@ export const messages = {
   bad_request: "The request could not be understood by the server.",
   unauthorized_access: "You do not have permission to access this resource.",
   fetching_failed : "Failed to fetch data",
+  fetching_success : "Successfully fetch data",
   required : "This is required.",
   not_available: "Data not available",
   invalid_format: "Invalid data format",
+  account_inactive: "Your account is inactive. Please contact the administrator.",
+  already_exist: 'Already exist',
 };
 
-export const image_url = {  url :"http://localhost:4200/" , };
+export const image_url = {  url :"https://ims.samyotech.in/api/" , };

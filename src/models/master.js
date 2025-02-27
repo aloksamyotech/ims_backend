@@ -4,17 +4,17 @@ import { tableNames } from "../common/constant.js";
 
 const adminSchema = new mongoose.Schema(
   {
-    username: {
+    name: {
       type: String,
       required: true,
       unique: true,
       trim: true,
     },
     phone: {
-        type: Number,
-        required: true,
-        trim: true,
-      },
+      type: Number,
+      required: true,
+      trim: true,
+    },
     email: {
       type: String,
       required: true,
@@ -29,15 +29,22 @@ const adminSchema = new mongoose.Schema(
     role: {
       type: String,
       default: "admin",
-      enum: ["admin", "superadmin"],
     },
     isDeleted: {
       type: Boolean,
       default: false,
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
+    currencyCode: {
+      type: String,
+      default: "INR",
+    },
+    currencySymbol: {
+      type: String,
+      default: "₹", 
+    },
+    logo: {
+      type: String,
+      default: "/uploads/inventory-logo.png",
     },
   },
   { timestamps: true }

@@ -2,10 +2,15 @@ import mongoose from "mongoose";
 import uniqueValidator from "mongoose-unique-validator";
 import { tableNames } from "../common/constant.js";
 import CategorySchemaModel from "./category.js";
-import UnitSchemaModel from "./unit.js";
+import UserSchemaModel from "./user.js";
 
 const ProductSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: tableNames.users,
+      required: true,
+    },
     productnm: {
       type: String,
       required: true,
@@ -25,10 +30,18 @@ const ProductSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    quantity: { 
+    avgCost: {
       type: Number,
-       required: true, 
-       default: 0,
+      default: 0,
+    },
+    quantity: {
+      type: Number,
+      default: 0,
+    },
+    quantityAlert: {
+      type: Number,
+      required: true,
+      default: 30,
     },
     product_no: {
       type: String,
@@ -56,15 +69,6 @@ const ProductSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    unitId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: tableNames.punit,
-      required: true, 
-    },
-    unitName: {
-      type: String,
-      trim: true,
-    },
     image: {
       type: String,
     },
@@ -73,9 +77,7 @@ const ProductSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-
 ProductSchema.plugin(uniqueValidator);
-
 const generateProductNumber = async () => {
   const lastProduct = await ProductSchemaModel.findOne()
     .sort({ createdAt: -1 })
@@ -84,7 +86,6 @@ const generateProductNumber = async () => {
     ? parseInt(lastProduct.product_no.split("-")[1])
     : 0;
   const newProductNumber = lastProductNumber + 1;
-
   return `PC-${String(newProductNumber).padStart(2, "0")}`;
 };
 
@@ -93,31 +94,46 @@ ProductSchema.pre("save", async function (next) {
     if (this.isNew) {
       this.product_no = await generateProductNumber();
     }
+    if (this.categoryId) {
+      const category = await CategorySchemaModel.findById(this.categoryId);
+      this.categoryName = category ? category.catnm : null;
+    }
+    if (this.userId) {
+      const user = await UserSchemaModel.findById(this.userId);
+      if (!user) {
+        return next(new Error("User not found"));
+      }
+      this.userId = user?._id;
+    }
 
-  if (this.categoryId) {
-    const category = await CategorySchemaModel.findById(this.categoryId);
-    this.categoryName = category ? category.catnm : null; 
+    if (this.productnm) {
+      this.slug = this.productnm
+        .toString()
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w\-]+/g, "")
+        .replace(/\--+/g, "-")
+        .replace(/^-+/, "")
+        .replace(/-+$/, "");
+    }
+    next();
+  } catch (error) {
+    next(error);
   }
+});
 
-  if (this.unitId) {
-    const unit = await UnitSchemaModel.findById(this.unitId);
-    this.unitName = unit ? unit.unitnm : null; 
+ProductSchema.pre("findOneAndUpdate", async function (next) {
+  try {
+    const update = this.getUpdate();
+    if (update.categoryId) {
+      const category = await CategorySchemaModel.findById(update.categoryId);
+      update.categoryName = category ? category.catnm : null;
+    }
+    this.setUpdate(update);
+    next();
+  } catch (error) {
+    next(error);
   }
-
-  if (this.productnm) {
-    this.slug = this.productnm
-      .toString()
-      .toLowerCase()
-      .replace(/\s+/g, "-")
-      .replace(/[^\w\-]+/g, "")
-      .replace(/\--+/g, "-")
-      .replace(/^-+/, "")
-      .replace(/-+$/, "");
-  }
-  next();
-} catch (error) {
-  next(error);
-}
 });
 
 const ProductSchemaModel = mongoose.model(tableNames.products, ProductSchema);

@@ -5,6 +5,8 @@ const supplierRouter = express.Router();
 supplierRouter.post("/save", SupplierController.create);
 supplierRouter.get("/fetch", SupplierController.fetch_supplier);
 supplierRouter.patch("/update/:id", SupplierController.updateSupplier);
+supplierRouter.get("/fetchById/:id", SupplierController.fetchById_supplier);
+supplierRouter.get("/count", SupplierController.getSupplierCount);
 supplierRouter.delete("/deleteById/:id",SupplierController.deleteSupplier);
 
 export default supplierRouter;

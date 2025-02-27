@@ -3,16 +3,10 @@ import { tableNames , messages} from "../common/constant.js";
 import SupplierSchemaModel from "../models/supplier.js";
 import ProductSchemaModel from "../models/products.js";
 import mongoose from "mongoose";
+import UserSchemaModel from "../models/user.js";
+import { updateAvgCost } from "./product.js";
 
 export const save = async (req) => {
-  const updateProductQuantity = async (productId, quantity) => {
-    const product = await ProductSchemaModel.findById(productId);
-    if (!product) {
-      throw new Error(`${messages.data_not_found} ${productId}`);
-    }
-    product.quantity = (Number(product.quantity) || 0) + Number(quantity);
-    await product.save();
-  };
   try {
     const {
       date,
@@ -22,10 +16,16 @@ export const save = async (req) => {
       subtotal,
       tax,
       supplierId,
-    } = req.body;
+      userId
+    } = req?.body;
 
     const supplier = await SupplierSchemaModel.findById(supplierId);
     if (!supplier) {
+      throw new Error(messages.data_not_found);
+    }
+
+    const user = await UserSchemaModel.findById(userId);
+    if (!user) {
       throw new Error(messages.data_not_found);
     }
 
@@ -43,16 +43,16 @@ export const save = async (req) => {
         quantity: product.quantity,
         price: dbProduct.buyingPrice,
       });
-      await updateProductQuantity(product.productId, product.quantity);
     }
 
     const purchaseModel = new PurchaseSchemaModel({
       date: new Date(date), 
       products: productOrders,
-      status: status || 'Pending',
+      status: status || 'pending',
       total,
       subtotal,
       tax,
+      userId: userId,
       supplierId: supplier._id,
       supplierName: supplier.suppliernm,
       supplierEmail: supplier.email,
@@ -66,7 +66,13 @@ export const save = async (req) => {
 
 export const fetch = async (req) => {
   try {
-    const condition_obj = { ...req.query };
+    const { userId } = req?.query;
+        const condition_obj = { isDeleted: false };
+    
+        if (userId) {
+          condition_obj.userId = new mongoose.Types.ObjectId(userId);
+        }
+        
     const pipeline = [
       { $match: condition_obj },
       {
@@ -92,8 +98,11 @@ export const fetch = async (req) => {
           subtotal: 1,
           tax: 1,
           total: 1,
+          userId: 1,
           supplierId: 1,
           supplierName: 1,
+          supplierEmail: 1,
+          supplierPhone: 1,
           products: {
             $map: {
               input: "$products",
@@ -152,6 +161,7 @@ export const fetchById = async (id) => {
           subtotal: 1,
           tax: 1,
           total: 1,
+          userId: 1,
           supplierId: 1,
           supplierName: 1,
           supplierEmail: 1,
@@ -190,22 +200,117 @@ export const deleteById = async (id) => {
   if (!purchase) {
     throw new Error(messages.data_not_found);
   }
+  purchase.isDeleted = true;
   return await purchase.save(); 
 };
 
-export const approvePurchase = async (id) => {
+export const handlePurchaseStatus = async (id, action) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       throw new Error(messages.invalid_format);
     }
+
     const purchase = await PurchaseSchemaModel.findById(id);
     if (!purchase) {
+      throw new Error(messages.data_not_found);
+    }
+    if (purchase?.status === 'pending') {
+      if (action === 'approve') {
+        purchase.status = 'completed';
+        for (const product of purchase?.products || []) {
+          await updateAvgCost(product?.productId, product?.quantity, product?.price); 
+        }
+      } else if (action === 'cancel') {
+        purchase.status = 'cancelled';
+      } else {
+        throw new Error('Invalid action provided');
+      }
+    } else {
       throw new Error(messages.invalid_format);
     }
-    purchase.status = 'Completed';
+
     return await purchase.save();
   } catch (error) {
-    throw new Error(messages.data_add_success + error.message);
+    throw new Error(error.message || messages.data_add_success + error.message);
+  }
+};
+
+export const countPurchases = async (req) => {
+  try {
+    const { userId, fromDate, toDate } = req?.query;
+
+    if (!userId) {
+      throw new Error("userId is required");
+    }
+
+    const query = {
+      isDeleted: false,
+      userId: userId,
+    };
+    if (fromDate && toDate) {
+      const from = new Date(fromDate);
+      const to = new Date(toDate);
+      query.createdAt = { $gte: from, $lte: to }; 
+    }
+
+    const purchaseCount = await PurchaseSchemaModel.find(query);
+    
+    if (!purchaseCount || purchaseCount === 0) {
+      return 0;
+    }
+
+    return purchaseCount.length;
+  } catch (error) {
+    throw new Error(messages.data_not_found);
+  }
+};
+
+export const getTotalPurchaseForEachCompany = async (req) => {
+  try {
+    const { userId } = req?.query;
+    const condition_obj = { isDeleted: false };
+
+    if (userId) {
+      condition_obj.userId = new mongoose.Types.ObjectId(userId);
+    }
+
+    const totalPurchasePerCompany = await PurchaseSchemaModel.aggregate([
+      { $match: condition_obj },
+      {
+        $group: {
+          _id: "$userId",
+          total_purchase_amount: { $sum: "$total" },
+        },
+      },
+      {
+        $lookup: {
+          from: tableNames.users,
+          localField: "_id",
+          foreignField: "_id",
+          as: "companyInfo",
+        },
+      },
+      {
+        $unwind: {
+          path: "$companyInfo",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          companyId: "$_id",
+          companyName: "$companyInfo.name",
+          total_purchase_amount: 1,
+        },
+      },
+      {
+        $sort: { total_purchase_amount: -1 },
+      },
+    ]);
+
+    return totalPurchasePerCompany;
+  } catch (error) {
+    throw new Error(messages.data_not_found);
   }
 };
 

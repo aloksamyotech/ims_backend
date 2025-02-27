@@ -1,10 +1,10 @@
-import { save , update , fetch , deleteById , fetchById , countCustomer} from '../services/customer.js';
+import { save , update , fetch , deleteById , fetchById , countSubscription} from '../services/subscription.js';
 import { statusCodes, messages } from '../common/constant.js';
 
 export const create = async (req, res) => {
   try {
-    const customerResponse = await save(req)
-    res.status(statusCodes.ok).json(customerResponse);
+    const subscriptionResponse = await save(req)
+    res.status(statusCodes.ok).json(subscriptionResponse);
   } catch (error) {
     res.status(statusCodes.internalServerError).json({
       message : messages.data_add_error
@@ -12,11 +12,11 @@ export const create = async (req, res) => {
   }
 }
 
-export const fetch_customer = async (req, res) => {
+export const fetch_subscription = async (req, res) => {
   try {
-    const customerResponse = await fetch(req);
-    if (customerResponse.length !== 0) {
-      res.status(statusCodes.ok).json(customerResponse);
+    const subscriptionResponse = await fetch(req);
+    if (subscriptionResponse.length !== 0) {
+      res.status(statusCodes.ok).json(subscriptionResponse);
     }
   }
   catch (error) {
@@ -25,40 +25,35 @@ export const fetch_customer = async (req, res) => {
 };
 
 
-export const updateCustomer = async (req, res) => {
-  const id  = req?.params?.id; 
-  if (!id) {
-    return res.status(statusCodes.badRequest).json(messages.required );
-  }
+export const updatedSubscription = async (req, res) => {
+  const id = req?.params?.id;
   const updateData = req?.body; 
   try {
-    const updatedCustomer = await update(id, updateData);
-    if (!updatedCustomer) {
+    const updatedSubscription= await update(id, updateData);
+    if (!updatedSubscription) {
       return res.status(statusCodes.notFound).json({ message: messages.not_found });
     }
-    return res.status(statusCodes.ok).json(updatedCustomer);
+    return res.status(statusCodes.ok).json(updatedSubscription);
   } catch (error) {
-    return res.status(statusCodes.internalServerError).json({ 
-      message: messages.data_update_error
-    });
+    return res.status(statusCodes.internalServerError).json({ message: messages.server_error });
   }
 };
 
-export const fetchById_customer = async (req, res) => {
+export const fetchById_subsription = async (req, res) => {
   try {
-    const id = req?.params?.id;
-    const customer = await fetchById(id); 
-    if (!customer) {
+    const id = req.params?.id;
+    const subscription = await fetchById(id); 
+    if (!subscription) {
       return res.status(statusCodes.notFound).json({ message:messages.data_not_found });
     }
-    return res.status(statusCodes.ok).json(customer); 
+    return res.status(statusCodes.ok).json(subscription); 
   } catch (error) {
     return res.status(statusCodes.internalServerError).json({ message: messages.fetching_failed, error: error.message }); 
   }
 };
 
-export const deleteCustomer = async (req, res) => {
-  const id = req?.params?.id;
+export const deleteSubscription = async (req, res) => {
+  const id = req.params?.id;
   if (!id) {
     return res.status(statusCodes.badRequest).json({ message: messages.required });
   }
@@ -73,21 +68,13 @@ export const deleteCustomer = async (req, res) => {
   }
 };
 
-export const getCustomerCount = async (req, res) => {
+export const getSubscriptionCount = async (req, res) => {
   try {
-    const customerCount = await countCustomer(req);
-    if (customerCount === 0) {
-      return res.status(statusCodes.ok).json({
-        success: true,
-        message: messages.data_not_found,
-        count: 0,
-      });
-    }
-
+    const subscriptionCount = await countSubscription();
     res.status(statusCodes.ok).json({
       success: true,
       message: messages.fetching_success,
-      count: customerCount,
+      count: subscriptionCount,
     });
   } catch (error) {
     res.status(statusCodes.internalServerError).json({
@@ -96,7 +83,6 @@ export const getCustomerCount = async (req, res) => {
     });
   }
 };
-
 
 
 

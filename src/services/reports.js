@@ -4,7 +4,7 @@ import { tableNames , messages} from "../common/constant.js";
 
 export const fetchSupplierProductReport = async (req) => {
     try {
-      const condition_obj = { ...req.query };
+      const condition_obj = { ...req?.query , isDeleted: false  };
       const pipeline = [
         { $match: condition_obj },
         {
@@ -57,7 +57,7 @@ export const fetchSupplierProductReport = async (req) => {
 
   export const fetchCustomerProductReport = async (req) => {
     try {
-      const condition_obj = { ...req.query };
+      const condition_obj = { ...req?.query , isDeleted: false  };
       const pipeline = [
         { $match: condition_obj },
         {
@@ -106,4 +106,11 @@ export const fetchSupplierProductReport = async (req) => {
       throw new Error(messages.fetching_failed + error.message);
     }
   };
+
+  
+  
+  
+ 
+  
+  
   
