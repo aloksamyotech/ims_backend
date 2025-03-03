@@ -2,6 +2,7 @@ import express from 'express';
 const userRouter = express.Router();
 import * as UserController from '../controller/user.js';
 import { authenticateJWT } from '../middleware/authMiddleware.js'; 
+import { uploadLogo } from '../common/upload_multer.js';
 
 userRouter.post('/save', UserController.create);
 userRouter.get('/fetch', UserController.fetchUser);
@@ -14,7 +15,6 @@ userRouter.patch('/change-status/:id',UserController.changeCompanyStatus);
 userRouter.get("/count", UserController.getCompanyCount);
 userRouter.get("/report", UserController.getCompanyCount);
 userRouter.post("/ai/report", UserController.getAiReportData);
-
-
+userRouter.put('/currency-logo/:id',uploadLogo,UserController.updateCurrencyLogo);
 
 export default userRouter;

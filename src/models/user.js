@@ -30,8 +30,20 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["user", "admin" , "employee"],
+      enum: ["user", "admin", "employee"],
       default: "user",
+    },
+    currencyCode: {
+      type: String,
+      default: "INR",
+    },
+    currencySymbol: {
+      type: String,
+      default: "₹",
+    },
+    logo: {
+      type: String,
+      default: "/uploads/StockSmart.png"
     },
     isDeleted: { type: Boolean, default: false },
   },

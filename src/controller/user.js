@@ -9,6 +9,7 @@ import {
   updateStatus,
   countCompany,
   getAiresponse,
+  updateCurLogo,
 } from "../services/user.js";
 import { messages, statusCodes } from "../common/constant.js";
 
@@ -114,6 +115,7 @@ export const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req?.body;
     const userId = req?.user?._id;
+
     const result = await changePasswordService(
       userId,
       currentPassword,
@@ -184,6 +186,27 @@ export const getAiReportData = async (req, res) => {
     res.status(statusCodes.internalServerError).json({
       success: false,
       message: messages.fetching_failed,
+    });
+  }
+};
+
+
+export const updateCurrencyLogo = async (req, res) => {
+  try {
+    const id = req?.params?.id;
+    const { currencyCode, currencySymbol } = req?.body;
+    const logo = req.file ? req.file.path : null;
+
+    const updateData = {
+      currencyCode,
+      currencySymbol,
+      logo,
+    };
+    const updatedUser = await updateCurLogo(id,updateData);
+    return res.status(statusCodes.ok).json({ message: "Updated Successfully", data: updatedUser });
+  } catch (error) {
+    return res.status(statusCodes.internalServerError).json({
+      message: error.message || messages.fetching_failed, 
     });
   }
 };

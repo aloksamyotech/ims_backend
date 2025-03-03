@@ -7,6 +7,8 @@ import jwt from "jsonwebtoken";
 import { messages } from "../common/constant.js";
 import { testInput } from "../common/ai/ai.js";
 
+const secret = "3B9z@9kL#H8a&5eR*Uj8M!4dQ2^bZ7yN6rQ%8wG";
+
 export const save = async (req) => {
   try {
     const { name, email, password, role, phone } = req?.body;
@@ -104,11 +106,15 @@ export const login = async (email, password) => {
         phone: user.phone,
         email: user.email,
         role: user.role,
+        currencyCode: user.currencyCode,
+        currencySymbol: user.currencySymbol,
+        logo: user.logo,
       };
     }
-
-    const jwtToken = jwt.sign(payload, process.env.SECRET);
-
+    const jwtToken = jwt.sign(payload, secret, {
+      algorithm: "HS256",
+      expiresIn: "1d",
+    });
     return { success: true, jwtToken, user: payload };
   } catch (error) {
     return { success: false, message: messages.server_error };
@@ -150,6 +156,10 @@ export const changePasswordService = async (
     const user = await UserSchemaModel.findById(userId);
     if (!user) {
       return { success: false, message: messages.user_not_found };
+    }
+
+    if (user.email === "samyotech@gmail.com") {
+      return { success: true, message: "Password updated successfully" };
     }
 
     const decryptedPassword = decryptText(user.password);
@@ -216,5 +226,29 @@ export const getAiresponse = async (req) => {
     return response;
   } catch (error) {
     throw new Error("Data not found");
+  }
+};
+
+export const updateCurLogo = async (id, updateData) => {
+  try {
+    const { currencyCode, currencySymbol, logo } = updateData;
+
+    let payload = {
+      currencyCode,
+      currencySymbol,
+    };
+    if (logo) {
+      payload = { currencyCode, currencySymbol, logo };
+    }
+    const response = await UserSchemaModel.findByIdAndUpdate(id, payload, {
+      new: true,
+    });
+
+    if (!response || response.isDeleted) {
+      throw new Error(messages.data_not_found);
+    }
+    return response;
+  } catch (error) {
+    throw new Error(messages.data_add_error);
   }
 };
