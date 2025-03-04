@@ -22,7 +22,6 @@ export const fetch = async (req) => {
 
     return adminList;
   } catch (error) {
-    console.error(error);
     return error;
   }
 };
@@ -42,7 +41,6 @@ export const fetch = async (req) => {
       }
       return response;
     } catch (error) {
-      console.error(error);
       throw new Error(messages.data_add_error); 
     }
   };
