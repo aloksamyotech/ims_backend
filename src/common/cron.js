@@ -16,10 +16,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp-relay.brevo.com",
+  port: 587,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: "8879a2001@smtp-brevo.com",
+    pass: "jfaA9mPbEFQnhS37",
   },
 });
 
@@ -116,11 +117,14 @@ const sendEmailAllUser = () => {
               currentY += 25;
             });
 
-            doc.moveDown(3);
+            doc.moveDown(1);
+            doc.fontSize(12).text("Purchases Report:", 50, doc.y, {
+              underline: true,
+              align: "left",
+              width: 200, 
+              continued: false, 
+            });
 
-            doc
-              .fontSize(12)
-              .text("Purchases Report:", { align: "left", underline: true });
             const purchaseHeaders = [
               "Supplier Name",
               "Email",
@@ -155,9 +159,9 @@ const sendEmailAllUser = () => {
             writeStream.on("finish", resolve);
             writeStream.on("error", reject);
           });
-       
+
           const mailOptions = {
-            from: process.env.EMAIL_USER,
+            from: "riya.rajputsdbc@gmail.com",
             to: user.email,
             subject: "Your Daily Order and Purchase Report",
             text: `Hello ${user.name},\n\nPlease find attached your daily order and purchase report.`,
