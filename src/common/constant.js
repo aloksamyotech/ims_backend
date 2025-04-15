@@ -60,3 +60,5 @@ export const messages = {
 };
 
 export const image_url = {  url :"https://ims.samyotech.in/api/" , };
+
+export const key = "riya"
