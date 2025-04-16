@@ -74,7 +74,6 @@ export const bulkUploadProducts = async (req) => {
       } = product;
 
       let category;
-
       if (categoryId) {
         category = await CategorySchemaModel.findById(categoryId);
       }
@@ -93,6 +92,18 @@ export const bulkUploadProducts = async (req) => {
         await category.save();
       }
 
+      const existingProduct = await ProductSchemaModel.findOne({
+        userId,
+        productnm: productnm.toLowerCase(),
+      });
+
+      if (existingProduct) {
+        console.log(
+          ` Duplicate Product: ${productnm} already exists for user ${userId}`
+        );
+        continue;
+      }
+
       const productWithUserId = {
         ...product,
         userId,
@@ -107,7 +118,7 @@ export const bulkUploadProducts = async (req) => {
 
     return savedProducts;
   } catch (error) {
-    throw new Error(messages.data_update_error, error.message);
+    throw new Error(`${messages.data_update_error}: ${error.message}`);
   }
 };
 

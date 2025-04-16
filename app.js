@@ -17,12 +17,14 @@ import employeeRouter from './src/routes/employee.js';
 import empPermissionRouter from "./src/routes/empPermissions.js";
 
 import customCron from "./src/common/cron.js";
+import responseInterceptor from "./src/common/core/responseInterceptor.js";
 
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 app.use(express.json());
+app.use(responseInterceptor);
 app.use("/api/uploads", express.static( 'uploads'));
 app.use("/api/category", categoryRouter);
 app.use("/api/unit", unitRouter);
