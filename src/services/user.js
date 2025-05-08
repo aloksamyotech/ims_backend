@@ -115,8 +115,11 @@ export const login = async (email, password) => {
       algorithm: "HS256",
       expiresIn: "1d",
     });
+
+    console.log(payload);
     return { success: true, jwtToken, user: payload };
   } catch (error) {
+    console.log(error);
     return { success: false, message: messages.server_error };
   }
 };
